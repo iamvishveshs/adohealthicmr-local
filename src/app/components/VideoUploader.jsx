@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 
 /**
  * VideoUploader Component
- * 
+ *
  * Direct Cloudinary video upload with:
  * - Local video preview
  * - Upload progress tracking
@@ -62,79 +62,62 @@ export default function VideoUploader() {
   };
 
   // Handle upload to Cloudinary
-  const handleUpload = () => {
-    if (!selectedFile) {
-      setError('Please select a video file first');
-      return;
-    }
-
-    if (!cloudName) {
-      setError('Cloudinary cloud name is not configured. Please set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME in .env.local');
-      return;
-    }
+  // Handle secure upload to Cloudinary
+  const handleUpload = async () => {
+    if (!selectedFile) return;
 
     setUploading(true);
     setError(null);
-    setUploadProgress(0);
-    setUploadResult(null);
 
-    // Create FormData
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('upload_preset', uploadPreset);
-    formData.append('folder', folder);
-    formData.append('resource_type', 'video');
+    try {
+      // 1. Get the signature from your API
+      const timestamp = Math.round(new Date().getTime() / 1000);
+      const paramsToSign = {
+        timestamp: timestamp,
+        folder: folder,
+        upload_preset: 'your_signed_preset_name', // Create a SIGNED preset in Cloudinary settings
+      };
 
-    // Use XMLHttpRequest for progress tracking (fetch doesn't support upload progress)
-    const xhr = new XMLHttpRequest();
-    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`;
+      const signRes = await fetch('/api/sign-cloudinary', {
+        method: 'POST',
+        body: JSON.stringify({ paramsToSign }),
+      });
+      const { signature } = await signRes.json();
 
-    // Track upload progress
-    xhr.upload.addEventListener('progress', (event) => {
-      if (event.lengthComputable) {
-        const percentComplete = Math.round((event.loaded / event.total) * 100);
-        setUploadProgress(percentComplete);
-      }
-    });
+      // 2. Prepare FormData for Direct Upload
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('api_key', process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY);
+      formData.append('timestamp', timestamp);
+      formData.append('signature', signature);
+      formData.append('folder', folder);
+      formData.append('upload_preset', 'your_signed_preset_name');
 
-    // Handle successful upload
-    xhr.addEventListener('load', () => {
-      if (xhr.status === 200) {
-        try {
-          const response = JSON.parse(xhr.responseText);
-          setUploadResult(response);
+      // 3. XHR for Progress Tracking
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloudName}/video/upload`);
+
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          setUploadProgress(Math.round((event.loaded / event.total) * 100));
+        }
+      };
+
+      xhr.onload = () => {
+        if (xhr.status === 200) {
+          setUploadResult(JSON.parse(xhr.responseText));
           setUploading(false);
-          setUploadProgress(100);
-        } catch (parseError) {
-          setError('Failed to parse upload response');
+        } else {
+          setError('Upload failed. Check your Cloudinary Preset settings.');
           setUploading(false);
         }
-      } else {
-        try {
-          const errorResponse = JSON.parse(xhr.responseText);
-          setError(errorResponse.error?.message || `Upload failed with status ${xhr.status}`);
-        } catch {
-          setError(`Upload failed with status ${xhr.status}`);
-        }
-        setUploading(false);
-      }
-    });
+      };
 
-    // Handle upload errors
-    xhr.addEventListener('error', () => {
-      setError('Network error occurred during upload. Please check your internet connection.');
+      xhr.send(formData);
+    } catch (err) {
+      setError('Failed to initiate secure upload.');
       setUploading(false);
-    });
-
-    // Handle upload abort
-    xhr.addEventListener('abort', () => {
-      setError('Upload was cancelled');
-      setUploading(false);
-    });
-
-    // Start upload
-    xhr.open('POST', uploadUrl);
-    xhr.send(formData);
+    }
   };
 
   // Handle reset
