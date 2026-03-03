@@ -22,7 +22,7 @@ export default function VideoUploader() {
   const fileInputRef = useRef(null);
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'adohealth';
-  const uploadPreset = 'ml_default';
+  const uploadPreset = 'adohealth_signed';
   const folder = 'videos';
 
   // Handle file selection
@@ -75,7 +75,7 @@ export default function VideoUploader() {
       const paramsToSign = {
         timestamp: timestamp,
         folder: folder,
-        upload_preset: 'your_signed_preset_name', // Create a SIGNED preset in Cloudinary settings
+        upload_preset: 'adohealth_signed', // Create a SIGNED preset in Cloudinary settings
       };
 
       const signRes = await fetch('/api/sign-cloudinary', {
@@ -91,7 +91,7 @@ export default function VideoUploader() {
       formData.append('timestamp', timestamp);
       formData.append('signature', signature);
       formData.append('folder', folder);
-      formData.append('upload_preset', 'your_signed_preset_name');
+      formData.append('upload_preset', 'adohealth_signed');
 
       // 3. XHR for Progress Tracking
       const xhr = new XMLHttpRequest();
