@@ -2133,7 +2133,7 @@ export default function Home() {
           )}
 
           {/* Dropdown Panel */}
-          <div className={`fixed top-[80px] sm:top-[100px] right-0 left-0 sm:left-auto w-full sm:w-[500px] sm:max-w-[90vw] h-[calc(100vh-80px)] sm:h-[580px] bg-blue-800 shadow-2xl z-[110] transform transition-all duration-300 ease-in-out overflow-hidden rounded-lg sm:rounded-l-lg border-2 border-yellow-500 ${isModulesPanelOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-[-10px] scale-95 pointer-events-none'
+          <div className={`fixed top-[60px] sm:top-[80px] right-0 left-0 sm:left-auto w-full sm:w-[500px] sm:max-w-[90vw] h-[calc(100vh-80px)] sm:h-[580px] bg-blue-800 shadow-2xl z-[110] transform transition-all duration-300 ease-in-out overflow-hidden rounded-lg sm:rounded-l-lg border-2 border-yellow-500 ${isModulesPanelOpen ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-[-10px] scale-95 pointer-events-none'
             }`}>
             {/* Panel Header */}
             <div className="sticky top-0 bg-blue-900 border-b-2 border-yellow-500 px-3 sm:px-4 py-2 sm:py-3 flex items-center justify-between z-10 shadow-sm">

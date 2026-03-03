@@ -6,7 +6,6 @@ import Header from "@/components/Header";
 import {
   ChevronRight,
   Mail,
-  Shield,
   Edit3,
   Key,
   Trash2,
@@ -20,21 +19,21 @@ import {
   Loader2
 } from "lucide-react";
 
+// Updated interfaces to match the new embedded answers data structure
+interface AnswerRow {
+  moduleId: number;
+  questionId: number;
+  answer: string;
+  isCorrect?: boolean;
+  submittedAt: string;
+}
+
 interface UserRow {
   id: string;
   username: string;
   email: string;
   role: string;
-}
-
-interface SubmissionRow {
-  userId: string;
-  moduleId: number;
-  moduleTitle: string;
-  questionId: number;
-  answer: string;
-  isCorrect?: boolean;
-  submittedAt: string;
+  answers?: AnswerRow[]; // Answers are now directly attached to the user
 }
 
 export default function UsersPage() {
@@ -42,8 +41,8 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false); // Added for Header synchronization
-  const [isAuthLoading, setIsAuthLoading] = useState(true);    // NEW: Critical for preventing "Button Pop"
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [userName, setUserName] = useState("");
 
   // Modal States
@@ -57,9 +56,7 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState<string>("all");
 
-  // Performance Optimized Submission States
-  const [userSubmissions, setUserSubmissions] = useState<Record<string, SubmissionRow[]>>({});
-  const [loadingSubmissions, setLoadingSubmissions] = useState<Record<string, boolean>>({});
+  // Accordion State
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
   const [actionError, setActionError] = useState("");
@@ -67,7 +64,6 @@ export default function UsersPage() {
 
   useEffect(() => {
     async function checkAuth() {
-      // Ensure we are in a loading state before starting the fetch
       setIsAuthLoading(true);
       try {
         const meRes = await fetch("/api/auth/me", { credentials: "include" });
@@ -80,7 +76,7 @@ export default function UsersPage() {
           setLoading(false);
         } else if (meData.user.role !== "admin") {
           setError("Admin access required.");
-          setIsUserLoggedIn(true); // User is logged in, but not admin
+          setIsUserLoggedIn(true);
           setIsAdmin(false);
           setLoading(false);
         } else {
@@ -88,22 +84,19 @@ export default function UsersPage() {
           setIsUserLoggedIn(true);
           setIsAdmin(true);
           setUserName(meData.user.username || meData.user.email || "Admin");
-          // Fetch users list now that admin status is confirmed
           await fetchUsers();
         }
       } catch (err) {
         setError("Failed to verify authentication.");
         setLoading(false);
       } finally {
-        // IMPORTANT: Only set this to false after all checks are 100% complete
-        // This prevents the Header from "popping" guest buttons early
         setIsAuthLoading(false);
       }
     }
     checkAuth();
   }, []);
 
-  // Fetch Users (Initial Load)
+  // Fetch Users (Now includes their specific answers embedded)
   const fetchUsers = async () => {
     try {
       const res = await fetch("/api/users", { credentials: "include" });
@@ -115,30 +108,11 @@ export default function UsersPage() {
         setError(data.error || data.message || "Failed to load users.");
       }
     } catch {
-      setError("Failed to verify authentication.");
+      setError("Failed to fetch users data.");
     } finally {
       setLoading(false);
     }
   };
-
-  // Lazy Load Submissions for a specific user
-  const fetchUserSpecificSubmissions = async (userId: string) => {
-    if (userSubmissions[userId]) return; // Avoid re-fetching
-    setLoadingSubmissions(prev => ({ ...prev, [userId]: true }));
-    try {
-      const res = await fetch(`/api/submissions?userId=${userId}`, { credentials: "include" });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setUserSubmissions(prev => ({ ...prev, [userId]: data.submissions || [] }));
-      }
-    } catch {
-      // Fail silently
-    } finally {
-      setLoadingSubmissions(prev => ({ ...prev, [userId]: false }));
-    }
-  };
-
-
 
   const handleLogout = async () => {
     try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
@@ -146,16 +120,14 @@ export default function UsersPage() {
   };
 
   const toggleUserAccordion = (userId: string) => {
-    const isOpening = expandedUserId !== userId;
-    setExpandedUserId(isOpening ? userId : null);
-    if (isOpening) fetchUserSpecificSubmissions(userId);
+    setExpandedUserId(expandedUserId === userId ? null : userId);
   };
 
   // Client-side instant filtering logic
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
       const matchesSearch = u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           u.username.toLowerCase().includes(searchTerm.toLowerCase());
+                            u.username.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesRole = filterRole === "all" || u.role === filterRole;
       return matchesSearch && matchesRole;
     });
@@ -198,7 +170,7 @@ export default function UsersPage() {
 
   const handleSavePassword = async () => {
     if (!passwordModal || !newPassword || newPassword.length < 6) {
-      setActionError("Password must be at least 6 characters");
+      setActionError("Password must be at least 8 characters");
       return;
     }
     setActionLoading(true);
@@ -295,9 +267,9 @@ export default function UsersPage() {
                 <thead>
                   <tr className="bg-slate-900/80 border-b border-slate-800">
                     <th className="w-12 px-4 py-5" />
-                    <th className="px-6 py-5 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Reference Identity</th>
-                    <th className="px-6 py-5 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">System Alias</th>
-                    <th className="px-6 py-5 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Role</th>
+                    <th className="px-6 py-5 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] text-left">Reference Identity</th>
+                    <th className="px-6 py-5 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] text-left">System Alias</th>
+                    <th className="px-6 py-5 text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] text-left">Role</th>
                     <th className="px-6 py-5 text-right text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Command</th>
                   </tr>
                 </thead>
@@ -307,15 +279,15 @@ export default function UsersPage() {
                   ) : (
                     filteredUsers.map((u) => {
                       const isExpanded = expandedUserId === u.id;
-                      const subs = userSubmissions[u.id] || [];
-                      const isLoad = loadingSubmissions[u.id];
+                      const subs = u.answers || []; // Pulls directly from the embedded answers
 
-                      // Categorize submissions by module name
+                      // Categorize submissions by module ID
                       const grouped = subs.reduce((acc, curr) => {
-                        if (!acc[curr.moduleTitle]) acc[curr.moduleTitle] = [];
-                        acc[curr.moduleTitle].push(curr);
+                        const title = `Module ${curr.moduleId}`;
+                        if (!acc[title]) acc[title] = [];
+                        acc[title].push(curr);
                         return acc;
-                      }, {} as Record<string, SubmissionRow[]>);
+                      }, {} as Record<string, AnswerRow[]>);
 
                       return (
                         <Fragment key={u.id}>
@@ -341,38 +313,71 @@ export default function UsersPage() {
                               </div>
                             </td>
                           </tr>
+
+                          {/* Instant Accordion Details */}
                           {isExpanded && (
                             <tr className="bg-slate-900/30 border-l-2 border-yellow-500 transition-all duration-500">
                               <td colSpan={5} className="p-0 border-b border-slate-800">
                                 <div className="px-10 py-12 animate-in fade-in slide-in-from-top-1 duration-700">
-                                  <div className="flex items-center gap-4 mb-8">
-                                    <div className="h-4 w-[1px] bg-yellow-500" />
-                                    <h3 className="text-[10px] font-black text-slate-400 ">User Progress History : {u.username}</h3>
+                                  <div className="flex items-center justify-between mb-8">
+                                    <div className="flex items-center gap-4">
+                                      <div className="h-4 w-[1px] bg-yellow-500" />
+                                      <h3 className="text-[10px] font-black text-slate-400 ">User Progress History : {u.username}</h3>
+                                    </div>
+                                    {subs.length > 0 && (
+                                      <span className="text-[10px] font-black text-green-500 bg-green-500/10 px-3 py-1 border border-green-500/20">
+                                        Total Answers: {subs.length}
+                                      </span>
+                                    )}
                                   </div>
 
-                                  {isLoad ? (
-                                    <div className="flex items-center gap-3 text-slate-500 py-10"><Loader2 size={16} className="animate-spin" /><span className="text-[10px] font-black uppercase">Retrieving module data...</span></div>
-                                  ) : Object.keys(grouped).length === 0 ? (
-                                    <div className="py-10 text-center border border-dashed border-slate-800"><p className="text-slate-600 text-xs italic tracking-widest">No submission activity recorded</p></div>
+                                  {Object.keys(grouped).length === 0 ? (
+                                    <div className="py-10 text-center border border-dashed border-slate-800">
+                                      <p className="text-slate-600 text-xs italic tracking-widest">No submission activity recorded</p>
+                                    </div>
                                   ) : (
                                     <div className="space-y-12">
                                       {Object.entries(grouped).map(([title, items]) => (
                                         <div key={title} className="border border-slate-800 no-round shadow-lg">
                                           <div className="bg-slate-800/30 px-6 py-3 flex items-center justify-between border-b border-slate-800">
-                                            <div className="flex items-center gap-3"><BookOpen size={14} className="text-yellow-500/60" /><h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider">{title}</h4></div>
+                                            <div className="flex items-center gap-3">
+                                              <BookOpen size={14} className="text-yellow-500/60" />
+                                              <h4 className="text-xs font-bold text-slate-200 uppercase tracking-wider">{title}</h4>
+                                            </div>
                                             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">{items.length} Tasks</span>
                                           </div>
                                           <table className="w-full text-[11px] text-left">
-                                            <thead><tr className="bg-slate-900/50 text-[9px] font-black uppercase text-slate-500 border-b border-slate-800"><th className="px-6 py-3">Reference</th><th className="px-6 py-3">Student Response</th><th className="px-6 py-3 text-center">Status</th><th className="px-6 py-3 text-right">Date</th></tr></thead>
+                                            <thead>
+                                              <tr className="bg-slate-900/50 text-[9px] font-black uppercase text-slate-500 border-b border-slate-800">
+                                                <th className="px-6 py-3">Reference</th>
+                                                <th className="px-6 py-3">Student Response</th>
+                                                <th className="px-6 py-3 text-center">Status</th>
+                                                <th className="px-6 py-3 text-right">Date</th>
+                                              </tr>
+                                            </thead>
                                             <tbody className="divide-y divide-slate-800/40">
                                               {items.map((s, idx) => (
                                                 <tr key={idx} className="hover:bg-white/[0.01] transition-all">
                                                   <td className="px-6 py-4 text-slate-500 font-mono tracking-tighter">Q.{s.questionId}</td>
                                                   <td className="px-6 py-4 text-slate-300 font-medium italic border-r border-slate-800/30">&quot;{s.answer}&quot;</td>
                                                   <td className="px-6 py-4">
-                                                    <div className="flex justify-center">{s.isCorrect === true ? (<span className="text-green-500/80 font-black uppercase tracking-tighter flex items-center gap-2"><CheckCircle2 size={10} /> Correct</span>) : s.isCorrect === false ? (<span className="text-red-500/80 font-black uppercase tracking-tighter flex items-center gap-2"><XCircle size={10} /> Incorrect</span>) : (<span className="text-slate-600 uppercase font-black text-[9px]">Awaiting</span>)}</div>
+                                                    <div className="flex justify-center">
+                                                      {s.isCorrect === true ? (
+                                                        <span className="text-green-500/80 font-black uppercase tracking-tighter flex items-center gap-2">
+                                                          <CheckCircle2 size={10} /> Correct
+                                                        </span>
+                                                      ) : s.isCorrect === false ? (
+                                                        <span className="text-red-500/80 font-black uppercase tracking-tighter flex items-center gap-2">
+                                                          <XCircle size={10} /> Incorrect
+                                                        </span>
+                                                      ) : (
+                                                        <span className="text-slate-600 uppercase font-black text-[9px]">Awaiting</span>
+                                                      )}
+                                                    </div>
                                                   </td>
-                                                  <td className="px-6 py-4 text-slate-600 text-right font-mono text-[10px]">{new Date(s.submittedAt).toLocaleDateString()}</td>
+                                                  <td className="px-6 py-4 text-slate-600 text-right font-mono text-[10px]">
+                                                    {new Date(s.submittedAt).toLocaleDateString()}
+                                                  </td>
                                                 </tr>
                                               ))}
                                             </tbody>
@@ -395,16 +400,18 @@ export default function UsersPage() {
           </div>
         )}
 
-        {/* Modals - All no-round */}
+        {/* Edit Modal */}
         {editModal && (
           <div className="fixed inset-0 bg-[#0a0a0a]/90 z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
             <div className="bg-[#1e293b] border border-slate-700 p-10 max-w-md w-full shadow-2xl transition-all no-round">
               <h2 className="text-xl font-bold text-white uppercase tracking-tight mb-8 italic">Update Personnel Meta</h2>
               <div className="space-y-6">
-                <div className="space-y-2"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Email Key</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Email Key</label>
                   <input type="email" value={editForm.email} onChange={(e) => setEditForm((f) => ({ ...f, email: e.target.value }))} className="w-full px-4 py-3 bg-slate-900 border border-slate-700 text-slate-200 outline-none focus:border-yellow-500/50 no-round transition-all" />
                 </div>
-                <div className="space-y-2"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">System Username</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">System Username</label>
                   <input type="text" value={editForm.username} onChange={(e) => setEditForm((f) => ({ ...f, username: e.target.value }))} className="w-full px-4 py-3 bg-slate-900 border border-slate-700 text-slate-200 outline-none focus:border-yellow-500/50 no-round transition-all" />
                 </div>
                 {actionError && <p className="text-red-400 text-[10px] font-bold uppercase tracking-widest">{actionError}</p>}
@@ -424,7 +431,8 @@ export default function UsersPage() {
               <h2 className="text-xl font-bold text-white uppercase mb-2 italic">Security Overhaul</h2>
               <p className="text-slate-500 text-[10px] font-bold uppercase mb-10 tracking-widest">ID: <span className="text-slate-300">{passwordModal.email}</span></p>
               <div className="space-y-6">
-                <div className="space-y-2"><label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">New System Key</label>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">New System Key</label>
                   <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" className="w-full px-4 py-3 bg-slate-900 border border-slate-700 text-white outline-none focus:border-yellow-500/50 transition-all no-round" />
                 </div>
                 {actionError && <p className="text-red-400 text-[10px] font-bold uppercase">{actionError}</p>}
@@ -459,7 +467,7 @@ export default function UsersPage() {
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; }
-        ::-webkit-scrollbar-thumb:hover { background: #yellow-500; }
+        ::-webkit-scrollbar-thumb:hover { background: #eab308; }
       `}</style>
     </main>
   );
