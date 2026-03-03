@@ -1,0 +1,16 @@
+[
+  {
+    "id": "user-testuser2-gmail-com",
+    "username": "testuser3@gmail.com",
+    "email": "testuser3@gmail.com",
+    "passwordHash": "$2a$10$vmu7A1GR8aAbToE4ar30zeTe.XEjnIEA.tRFbZyehOfRpSn761Jvq",
+    "role": "user"
+  },
+  {
+    "id": "user-testuser4-gmail-com",
+    "username": "testuser4@gmail.com",
+    "email": "testuser4@gmail.com",
+    "passwordHash": "$2a$10$s2J4XpzHwbLc6Tz1I1Jjeei6eQf58.iWsq4CCh5khymBH52X2D1.y",
+    "role": "user"
+  }
+]

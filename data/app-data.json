@@ -1,0 +1,1044 @@
+{
+  "modules": [
+    {
+      "id": 1,
+      "title": "Module 1 ( Introduction to NCDs )",
+      "description": "Introduction to Non-Communicable Diseases (NCDs)"
+    },
+    {
+      "id": 2,
+      "title": "Module 2 & 3 ( Tobacco & Alcohol )",
+      "description": "Your Health, Your Choice"
+    },
+    {
+      "id": 3,
+      "title": "Module 4  ( Unhealthy Diet )",
+      "description": "Unhealthy Diet & NCDs"
+    },
+    {
+      "id": 4,
+      "title": "Module 5 ( Physical Activity ) ",
+      "description": "Stay Active, Beat NCDs"
+    },
+    {
+      "id": 5,
+      "title": "Module 6 ( Sedentary Screen Time )",
+      "description": "Sedentary Screentime"
+    },
+    {
+      "id": 6,
+      "title": "Module 7 ( Sleep Quality )",
+      "description": "Good Sleep, Great Health"
+    }
+  ],
+  "questions": {
+    "1": [
+      {
+        "id": 1,
+        "question": "Which of the following is a Non-communicable Disease (NCD)?",
+        "options": [
+          "A. Tuberculosis",
+          "B. Heart disease",
+          "C. Cholera",
+          "D. Hepatitis"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 2,
+        "question": "Which of the following is one of the BIG 7 risk factors that causes NCDs?",
+        "options": [
+          "A. Drinking water",
+          "B. Unhealthy diet",
+          "C. Brushing teeth",
+          "D. Washing hands"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 3,
+        "question": "What does the \"S\" in BE FAST for stroke stand for?",
+        "options": [
+          "A. Sleep",
+          "B. Speech difficulty",
+          "C. Stress",
+          "D. Sugar"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 4,
+        "question": "Which food helps prevent NCDs?",
+        "options": [
+          "A. Samosa",
+          "B. Spinach",
+          "C. Cola",
+          "D. Chips"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 5,
+        "question": "Smokeless tobacco increases the risk of which disease?",
+        "options": [
+          "A. Asthma",
+          "B. Oral cancer",
+          "C. Osteoarthritis",
+          "D. Migraine"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 6,
+        "question": "Alcohol use increases the risk of:",
+        "options": [
+          "A. Cataract",
+          "B. Psoriasis",
+          "C. Cancer",
+          "D. Arthritis"
+        ],
+        "correctAnswer": 2
+      },
+      {
+        "id": 7,
+        "question": "Physical inactivity increases the risk of:",
+        "options": [
+          "A. Epilepsy",
+          "B. Obesity",
+          "C. Glaucoma",
+          "D. Parkinson's disease"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 8,
+        "question": "Excessive sedentary screen time increases risk of:",
+        "options": [
+          "A. Kidney stones",
+          "B. Obesity",
+          "C. Thyroid disorders",
+          "D. Varicose veins"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 9,
+        "question": "Poor sleep increases risk of:",
+        "options": [
+          "A. Scoliosis",
+          "B. Diabetes",
+          "C. Psoriasis",
+          "D. Osteoarthritis"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 10,
+        "question": "Which lifestyle choice helps prevent NCDs?",
+        "options": [
+          "A. Skipping meals",
+          "B. Regular exercise",
+          "C. Excessive gaming",
+          "D. Midnight snacking"
+        ],
+        "correctAnswer": 1
+      }
+    ],
+    "2": [
+      {
+        "id": 1,
+        "question": "1.\tWhat is one reason adolescents are more vulnerable to the effects of tobacco and alcohol?",
+        "options": [
+          "A. Their bodies are fully developed",
+          "B. Their brains are still developing",
+          "C. They are not influenced by peer pressure",
+          "D. They have stronger immune systems"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 2,
+        "question": "2.\tWhich of the following is a short-term health effect of tobacco use?",
+        "options": [
+          "A. Liver cirrhosis",
+          "B. Frequent coughing",
+          "C. Heart disease",
+          "D. Pancreatic cancer"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 3,
+        "question": "3.\tWhy should adolescents delay using alcohol to protect their future?",
+        "options": [
+          "A. It helps them avoid homework",
+          "B. It prevents addiction and supports achieving goals",
+          "C. ) It makes them more popular among friends",
+          "D. It improves their physical appearance"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 4,
+        "question": "4.\tWhich social factor is a major reason teens try tobacco or alcohol?",
+        "options": [
+          "A .Parental support",
+          "B. Peer pressure",
+          "C. Academic success",
+          "D. Healthy hobbies"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 5,
+        "question": "5.\tWhat is a long-term health consequence of alcohol use?",
+        "options": [
+          "A. Improved concentration",
+          "B. Liver cirrhosis",
+          "C. Better stamina for sports",
+          "D. Reduced anxiety"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 6,
+        "question": "6.\tAccording to the module, why is it harmful to believe that “one or two cigarettes a day cannot harm me”?",
+        "options": [
+          "A. It’s true; small amounts are safe",
+          "B. Cigarettes contain toxic chemicals that cause harm even in small amounts",
+          "C. Only e-cigarettes are harmful",
+          "D. It only harms adults, not teens"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 7,
+        "question": "7.\tHow can parents help prevent adolescent substance use?",
+        "options": [
+          "A. By ignoring their teen’s activities",
+          "B. By having open conversations and setting clear rules",
+          "C. By encouraging risky behaviors",
+          "D. By avoiding discussions about health"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 8,
+        "question": "8.\tWhat is one healthy alternative to tobacco and alcohol use mentioned in the module?",
+        "options": [
+          "A. Watching movies that promote smoking",
+          "B. Playing sports",
+          "C. Spending time alone",
+          "D. Experimenting with e-cigarettes"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 9,
+        "question": "9.\tIn Roshan’s case study, what helped him quit smoking and reduce alcohol use?",
+        "options": [
+          "A. Joining a smoking club",
+          "B. Counseling and family support",
+          "C.Spending more time with older boys",
+          "D. Skipping school regularly"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 10,
+        "question": "10.\tWhy does delaying tobacco and alcohol use align with Indian cultural values?",
+        "options": [
+          "A. It encourages breaking rules",
+          "B. It reflects respect and responsibility",
+          "C. It promotes risky behaviors",
+          "D. It isolates teens from their community"
+        ],
+        "correctAnswer": 1
+      }
+    ],
+    "3": [
+      {
+        "id": 1,
+        "question": "1.\tWhat does JUNCS stand for, per the IAP?",
+        "options": [
+          "A. Juicy, Unhealthy, Nutritious, Carbonated, Sweet",
+          "B. Junk, Ultra-processed, Nutritionally inappropriate, Caffeinated, Sugar-sweetened",
+          "C. Justified, Unprocessed, Nutritious, Colored, Sugary",
+          "D. Junk, Useful, Natural, Carbonated, Sweet"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 2,
+        "question": "2.\tWhich is a JUNCS food?",
+        "options": [
+          "A. Homemade curd",
+          "B. Packaged breakfast cereal",
+          "C. Fresh mango",
+          "D. Whole wheat roti"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 3,
+        "question": "3.\tWhich NCD is linked to too much salt in JUNCS foods?",
+        "options": [
+          "A. Diabetes",
+          "B. Hypertension",
+          "C. Anaemia",
+          "D. Heart disease"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 4,
+        "question": "4.\tWhat percentage of your plate should be vegetables and fruits?",
+        "options": [
+          "A. 25%",
+          "B. 50%",
+          "C. 75%",
+          "D. 100%"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 5,
+        "question": "5.\tWhich food group provides energy through carbohydrates?",
+        "options": [
+          "A. Milk and Dairy",
+          "B. Cereals and Millets",
+          "C. Pulses",
+          "D. Fruits"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 6,
+        "question": "6.\tWhat is the daily sugar limit for teens?",
+        "options": [
+          "A. 5-10g",
+          "B. 20-25g",
+          "C. 50-60g",
+          "D. No limit"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 7,
+        "question": "7.\tHow many servings of milk should teens have daily?",
+        "options": [
+          "A. 1-2",
+          "B. 2-3",
+          "C. 4-5",
+          "D. 6-8"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 8,
+        "question": "8.\tWhat does skipping breakfast lead to?",
+        "options": [
+          "A. Better focus",
+          "B. Nutrient deficiencies",
+          "C. Stronger bones",
+          "D. Lower NCD risk"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 9,
+        "question": "9.\tWhich food group helps prevent anaemia?",
+        "options": [
+          "A. Fruits",
+          "B. Pulses and Meat",
+          "C. Fats and Oils",
+          "D. Cereals"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 10,
+        "question": "10.\tHow often should teens eat JUNCS foods, per the IAP?",
+        "options": [
+          "A. Every day",
+          "B. Once a week",
+          "C. Once a month",
+          "D. Never"
+        ],
+        "correctAnswer": 1
+      }
+    ],
+    "4": [
+      {
+        "id": 1,
+        "question": "1.\tWhat is the minimum recommended daily physical activity for adolescents according to WHO?",
+        "options": [
+          "A. 30 minutes",
+          "B. 60 minutes",
+          "C. 90 minutes",
+          "D. 120 minutes"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 2,
+        "question": "2.\tWhich of the following best defines physical activity?",
+        "options": [
+          "A. Planned and structured movement to improve fitness",
+          "B. Any bodily movement that uses energydiet",
+          "C. A measurable state of health and performance",
+          "D. Only competitive sports"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 3,
+        "question": "3.\tWhat is a key difference between physical activity and physical exercise?",
+        "options": [
+          "A. Physical activity is planned; exercise is not",
+          "B. Exercise is structured and repetitive; physical activity includes all movement",
+          "C. Physical activity is only for athletes; exercise is for everyone",
+          "D. Exercise does not improve fitness"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 4,
+        "question": "4.\tWhich of the following is a short-term benefit of physical activity?",
+        "options": [
+          "A. Reduced risk of heart disease",
+          "B. Improved focus and mood",
+          "C. Stronger bones in adulthood",
+          "D. Lower cholesterol levels"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 5,
+        "question": "5.\tPhysical inactivity increases the risk of which disease?",
+        "options": [
+          "A. Malaria",
+          "B. Type 2 diabetes",
+          "C. Tuberculosis",
+          "D. Influenza"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 6,
+        "question": "6.\tHow often should adolescents include muscle- and bone-strengthening exercises?",
+        "options": [
+          "A. Once a week",
+          "B. At least 3 times a week",
+          "C. Every day",
+          "D. Once a month"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 7,
+        "question": "7.\tWhich of the following is a barrier to physical activity for adolescents in India?",
+        "options": [
+          "A. Access to too many sports facilities",
+          "B. Academic pressure and screen time",
+          "C. Lack of national fitness programs",
+          "D. Too much free time"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 8,
+        "question": "8.\tWhich national program promotes physical activity among Indian youth?",
+        "options": [
+          "A. Swachh Bharat",
+          "B. Fit India Movement",
+          "C. Digital India",
+          "D. Make in India"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 9,
+        "question": "9.\tWhat was a key factor in Simran’s success in becoming more active?",
+        "options": [
+          "A. Joining a competitive sports team",
+          "B. Support from a school yoga program",
+          "C. Buying expensive exercise equipment",
+          "D. Studying more"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 10,
+        "question": "10.\tWhich statement is true about physical activity?",
+        "options": [
+          "A. Only athletes need to be active",
+          "B. Some activity is better than none",
+          "C. It requires a gym membership",
+          "D. It does not affect mental health"
+        ],
+        "correctAnswer": 1
+      }
+    ],
+    "5": [
+      {
+        "id": 1,
+        "question": "Which of the following best defines “screen time”?",
+        "options": [
+          "A. Only using social media apps like Instagram or Snapchat",
+          "B. Any time spent interacting with devices that have screens, such as phones, tablets, or TVs",
+          "C. Only watching educational videos for schoolwork",
+          "D. Using a smartwatch to track fitness"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 2,
+        "question": "Which is an example of educational screen time?",
+        "options": [
+          "A. Scrolling Instagram Reels for hours",
+          "B. Using apps like BYJU’S or Khan Academy for studies",
+          "C. Watching IPL matches all day",
+          "D. Playing Candy Crush during breaks"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 3,
+        "question": "How does excessive screen time before bedtime impact your body?",
+        "options": [
+          "A. It improves your ability to relax and fall asleep",
+          "B. It disrupts your sleep cycle by suppressing melatonin production",
+          "C. It has no effect on your physical health",
+          "D. It enhances your energy levels for the next day"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 4,
+        "question": "What is the suggested daily limit for recreational screen time for adolescents to maintain a healthy balance?",
+        "options": [
+          "A. 5–6 hours",
+          "B. 1–2 hours",
+          "C. 3–4 hours",
+          "D. No specific limit"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 5,
+        "question": "What is a potential emotional effect of excessive screen time?",
+        "options": [
+          "A. Improved focus in school",
+          "B. Shorter attention spans and irritability",
+          "C. Increased confidence",
+          "D. Better memory"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 6,
+        "question": "What does the “20-20-20 rule” help prevent?",
+        "options": [
+          "A. Battery drain on your phone",
+          "B. Eye strain from prolonged screen use",
+          "C. Slow internet speed",
+          "D. Homework delays"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 7,
+        "question": "Why are screen-free zones, like during dinner, important?",
+        "options": [
+          "A. They make screens more fun later",
+          "B. They improve family bonding and sleep",
+          "C. They help charge your phone faster",
+          "D. They increase your social media followers"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 8,
+        "question": "What is a benefit of balanced screen time?",
+        "options": [
+          "A. It always causes headaches",
+          "B. It supports learning and creativity",
+          "C. It reduces physical activity",
+          "D. It leads to social isolation"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 9,
+        "question": "7.\tHow can parents help adolescents manage screen time?",
+        "options": [
+          "A. By giving unlimited screen access",
+          "B. By setting clear rules and discussing screen use",
+          "C. By buying more gadgets",
+          "D. By ignoring screen habits"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 10,
+        "question": "8.\tWhich is a healthy alternative to screen time?",
+        "options": [
+          "A. Watching TV serials all evening",
+          "B. Playing cricket or doing rangoli with friends",
+          "C. Video calling cousins for hours",
+          "D. Scrolling TikTok before bed"
+        ],
+        "correctAnswer": 1
+      }
+    ],
+    "6": [
+      {
+        "id": 1,
+        "question": "1.\tHow many hours of sleep are recommended for adolescents ?",
+        "options": [
+          "A. 5–6 hours",
+          "B. 6–8 hours",
+          "C. 8–10 hours",
+          "D. 10–12 hours"
+        ],
+        "correctAnswer": 2
+      },
+      {
+        "id": 2,
+        "question": "2.\tWhat is sleep deprivation?",
+        "options": [
+          "A. Sleeping too much",
+          "B. Not getting enough sleep or poor-quality sleep",
+          "C. Sleeping during the day",
+          "D. Using screens all night"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 3,
+        "question": "3.\tWhich of these is a short-term effect of poor sleep?",
+        "options": [
+          "A. High blood pressure",
+          "B. Daytime sleepiness",
+          "C. Daytime sleepiness",
+          "D. Heart disease"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 4,
+        "question": "4.\tHow does poor sleep increase the risk of obesity?",
+        "options": [
+          "A. It strengthens muscles",
+          "B. It balances hunger hormones",
+          "C. It increases hunger hormones and appetite",
+          "D. It improves metabolism"
+        ],
+        "correctAnswer": 2
+      },
+      {
+        "id": 5,
+        "question": "5.\tWhich NCD is linked to chronic sleep deprivation?",
+        "options": [
+          "A. Asthma",
+          "B. Type 2 diabetes",
+          "C. Allergies",
+          "D. Common cold"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 6,
+        "question": "6.\tWhat is one common barrier to good sleep for teens in India?",
+        "options": [
+          "A. Eating healthy meals",
+          "B. Late-night social media use",
+          "C. Exercising regularly",
+          "D. Drinking water"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 7,
+        "question": "7.\tWhat can improve sleep hygiene?",
+        "options": [
+          "A. Drinking coffee before bed",
+          "B. Using a phone until bedtime",
+          "C. Creating a consistent sleep schedule",
+          "D. Watching TV in bed"
+        ],
+        "correctAnswer": 2
+      },
+      {
+        "id": 8,
+        "question": "8.\tWhy should you avoid screens before bed?",
+        "options": [
+          "A. They make you hungry",
+          "B. They emit blue light that disrupts sleep",
+          "C. They improve focus",
+          "D. They help you relax"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 9,
+        "question": "9.\tHow can schools support better sleep for teens?",
+        "options": [
+          "A.  Schedule early morning tests",
+          "B. Assign heavy homework daily",
+          "C. Avoid early morning classes",
+          "D. Encourage late-night study groups"
+        ],
+        "correctAnswer": 2
+      },
+      {
+        "id": 10,
+        "question": "10.\tWhat did Riya’s story teach us about sleep?",
+        "options": [
+          "A. Sleeping 4–5 hours is enough for teens",
+          "B. Poor sleep can increase health risks like diabetes",
+          "C. Using phones before bed improves focus",
+          "D. Sleep doesn’t affect weight"
+        ],
+        "correctAnswer": 1
+      }
+    ],
+    "7": [
+      {
+        "id": 1,
+        "question": "1.\tWhat is stress?",
+        "options": [
+          "A. A state of complete relaxation",
+          "B. The body's natural response to challenges, often called the \"fight, flight, or freeze\" response",
+          "C. Only negative emotions like anger or sadness",
+          "D. A permanent condition that cannot be managed"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 2,
+        "question": "2.\tWhich of the following is a common physical signal of stress?",
+        "options": [
+          "A. Feeling energized all the time",
+          "B. Sweaty palms or a racing heart",
+          "C .Improved appetite with no changes",
+          "D. Better focus and concentration"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 3,
+        "question": "3.\tWhat is a common source of stress for teenagers?",
+        "options": [
+          "A. Academic pressure from exams and heavy workloads",
+          "B. Having too much free time",
+          "C. Lack of responsibilities at home",
+          "D. Always feeling included in social groups"
+        ],
+        "correctAnswer": 0
+      },
+      {
+        "id": 4,
+        "question": "4.\tHow can chronic stress affect your physical health?",
+        "options": [
+          "A. It improves your immune system",
+          "B. It can lead to sleep problems and a weakened immune system",
+          "C. It does not affect your body",
+          "D. It only affects your mental health"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 5,
+        "question": "5.\tWhich of the following is an example of a negative thought pattern associated with stress?",
+        "options": [
+          "A. Thinking you can improve with practice",
+          "B. Catastrophizing, or imagining the worst possible outcome",
+          "C. Believing you did your best despite challenges",
+          "D. Focusing on positive aspects of a situation"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 6,
+        "question": "6.\tWhat is the purpose of the \"Catch It, Check It, Change It\" technique?",
+        "options": [
+          "A. To ignore negative thoughts completely",
+          "B. To identify, challenge, and reframe unhelpful thoughts",
+          "C. To avoid stressful situations entirely",
+          "D. To focus only on positive emotions"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 7,
+        "question": "7.\tWhich stress management technique involves focusing on the present moment without judgment?",
+        "options": [
+          "A. Deep belly breathing",
+          "B. Progressive muscle relaxation",
+          "C. Mindfulness",
+          "D. Time management"
+        ],
+        "correctAnswer": 2
+      },
+      {
+        "id": 8,
+        "question": "8.\tHow can physical activity help manage stress?",
+        "options": [
+          "A. It increases stress hormones in the body",
+          "B. It releases endorphins, which are natural mood boosters",
+          "C. It makes you feel more tired and stressed",
+          "D. It does not affect stress levels"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 9,
+        "question": "9.\tWhy is social support important for managing stress?",
+        "options": [
+          "A. It eliminates all sources of stress",
+          "B. It provides a buffer against stress through healthy relationships",
+          "C. It encourages you to avoid responsibilities",
+          "D. It makes stress worse by adding pressure"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 10,
+        "question": "10.\tWhat does resilience mean in the context of stress management?",
+        "options": [
+          "A. Never experiencing stress or challenges",
+          "B. The ability to bounce back and grow stronger from difficult situations",
+          "C. Avoiding all stressful situations",
+          "D. Always feeling happy and relaxed"
+        ],
+        "correctAnswer": 1
+      }
+    ],
+    "8": [
+      {
+        "id": 1,
+        "question": "Which of the following is a Non-communicable Disease (NCD)?",
+        "options": [
+          "A. Tuberculosis",
+          "B. Heart disease",
+          "C. Cholera",
+          "D. Cholestrol"
+        ],
+        "correctAnswer": 2
+      },
+      {
+        "id": 2,
+        "question": "Which of the following is one of the BIG 7 risk factors that causes NCDs?",
+        "options": [
+          "A. Drinking water",
+          "B. Unhealthy diet",
+          "C. Brushing teeth",
+          "D. Washing hands"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 3,
+        "question": "What does the \"S\" in BE FAST for stroke stand for?",
+        "options": [
+          "A. Sleep",
+          "B. Speech difficulty",
+          "C. Stress",
+          "D. Sugar"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 4,
+        "question": "Which food helps prevent NCDs?",
+        "options": [
+          "A. Samosa",
+          "B. Spinach",
+          "C. Cola",
+          "D. Chips"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 5,
+        "question": "Smokeless tobacco increases the risk of which disease?",
+        "options": [
+          "A. Asthma",
+          "B. Oral cancer",
+          "C. Osteoarthritis",
+          "D. Migraine"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 6,
+        "question": "Alcohol use increases the risk of:",
+        "options": [
+          "A. Cataract",
+          "B. Psoriasis",
+          "C. Cancer",
+          "D. Arthritis"
+        ],
+        "correctAnswer": 2
+      },
+      {
+        "id": 7,
+        "question": "Physical inactivity increases the risk of:",
+        "options": [
+          "A. Epilepsy",
+          "B. Obesity",
+          "C. Glaucoma",
+          "D. Parkinson's disease"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 8,
+        "question": "Excessive sedentary screen time increases risk of:",
+        "options": [
+          "A. Kidney stones",
+          "B. Obesity",
+          "C. Thyroid disorders",
+          "D. Varicose veins"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 9,
+        "question": "Poor sleep increases risk of:",
+        "options": [
+          "A. Scoliosis",
+          "B. Diabetes",
+          "C. Psoriasis",
+          "D. Osteoarthritis"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 10,
+        "question": "Which lifestyle choice helps prevent NCDs?",
+        "options": [
+          "A. Skipping meals",
+          "B. Regular exercise",
+          "C. Excessive gaming",
+          "D. Midnight snacking"
+        ],
+        "correctAnswer": 1
+      }
+    ],
+    "9": [
+      {
+        "id": 1,
+        "question": "Which of the following is a Non-communicable Disease (NCD)?",
+        "options": [
+          "A. Tuberculosis",
+          "B. Heart disease",
+          "C. Cholera",
+          "D. Hepatitis"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 2,
+        "question": "Which of the following is one of the BIG 7 risk factors that causes NCDs?",
+        "options": [
+          "A. Drinking water",
+          "B. Unhealthy diet",
+          "C. Brushing teeth",
+          "D. Washing hands"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 3,
+        "question": "What does the \"S\" in BE FAST for stroke stand for?",
+        "options": [
+          "A. Sleep",
+          "B. Speech difficulty",
+          "C. Stress",
+          "D. Sugar"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 4,
+        "question": "Which food helps prevent NCDs?",
+        "options": [
+          "A. Samosa",
+          "B. Spinach",
+          "C. Cola",
+          "D. Chips"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 5,
+        "question": "Smokeless tobacco increases the risk of which disease?",
+        "options": [
+          "A. Asthma",
+          "B. Oral cancer",
+          "C. Osteoarthritis",
+          "D. Migraine"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 6,
+        "question": "Alcohol use increases the risk of:",
+        "options": [
+          "A. Cataract",
+          "B. Psoriasis",
+          "C. Cancer",
+          "D. Arthritis"
+        ],
+        "correctAnswer": 2
+      },
+      {
+        "id": 7,
+        "question": "Physical inactivity increases the risk of:",
+        "options": [
+          "A. Epilepsy",
+          "B. Obesity",
+          "C. Glaucoma",
+          "D. Parkinson's disease"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 8,
+        "question": "Excessive sedentary screen time increases risk of:",
+        "options": [
+          "A. Kidney stones",
+          "B. Obesity",
+          "C. Thyroid disorders",
+          "D. Varicose veins"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 9,
+        "question": "Poor sleep increases risk of:",
+        "options": [
+          "A. Scoliosis",
+          "B. Diabetes",
+          "C. Psoriasis",
+          "D. Osteoarthritis"
+        ],
+        "correctAnswer": 1
+      },
+      {
+        "id": 10,
+        "question": "Which lifestyle choice helps prevent NCDs?",
+        "options": [
+          "A. Skipping meals",
+          "B. Regular exercise",
+          "C. Excessive gaming",
+          "D. Midnight snacking"
+        ],
+        "correctAnswer": 1
+      }
+    ]
+  }
+}
