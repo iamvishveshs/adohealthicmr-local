@@ -48,7 +48,10 @@ export const GET = requireAuth(async (request: NextRequest, user) => {
       return NextResponse.json(data, { status: res.status });
     }
     const moduleIdNum = moduleId ? parseInt(moduleId) : undefined;
-    const answers = getAnswers(queryUserId, isNaN(moduleIdNum as number) ? undefined : moduleIdNum);
+
+    // FIX: Added 'await' here
+    const answers = await getAnswers(queryUserId, isNaN(moduleIdNum as number) ? undefined : moduleIdNum);
+
     return NextResponse.json({ success: true, answers });
   } catch (error) {
     console.error('Error fetching answers:', error);
@@ -99,13 +102,16 @@ export const POST = requireAuth(async (request: NextRequest, user) => {
         isCorrect = answer === question.options[question.correctAnswer];
       }
     }
-    const record = upsertAnswer({
+
+    // FIX: Added 'await' here
+    const record = await upsertAnswer({
       userId: user.userId,
       moduleId,
       questionId,
       answer: String(answer),
       isCorrect,
     });
+
     // Send notification email (best-effort)
     try {
       await sendAnswerNotification('adohealthicr2025@gmail.com', {
