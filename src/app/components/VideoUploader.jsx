@@ -152,9 +152,9 @@ export default function VideoUploader({ moduleId, videoType, onUploadSuccess }) 
   const videoUrl = uploadResult?.secure_url || uploadResult?.url;
 
   return (
-    <div className="video-uploader-container" style={{ width: '100%', padding: '10px' }}>
+    <div className="video-uploader-container" style={{ width: '100%', padding: '10px',textAlign: 'center' }}>
       {/* File Selection */}
-      <div style={{ marginBottom: '15px' }}>
+      <div style={{ marginBottom: '15px',textAlign: 'center' }}>
         <label
           htmlFor={`video-input-${moduleId}-${videoType}`}
           style={{
@@ -206,7 +206,7 @@ export default function VideoUploader({ moduleId, videoType, onUploadSuccess }) 
           style={{
             width: '100%',
             padding: '10px',
-            backgroundColor: uploading ? '#ccc' : '#28a745',
+            backgroundColor: uploading ? '#ccc' : '#0070f3',
             color: 'white',
             border: 'none',
             borderRadius: '5px',
@@ -214,7 +214,7 @@ export default function VideoUploader({ moduleId, videoType, onUploadSuccess }) 
             fontWeight: 'bold'
           }}
         >
-          {uploading ? `Uploading ${uploadProgress}%...` : 'Start Fast Upload'}
+          {uploading ? `Uploading ${uploadProgress}%...` : 'Upload Video'}
         </button>
       )}
 
@@ -229,8 +229,8 @@ export default function VideoUploader({ moduleId, videoType, onUploadSuccess }) 
 
       {/* Success Result */}
       {uploadResult && (
-        <div style={{ padding: '10px', backgroundColor: '#e8f5e9', border: '1px solid #4caf50', borderRadius: '5px', marginTop: '10px' }}>
-          <p style={{ color: '#2e7d32', margin: 0, fontSize: '14px' }}>✅ Upload Complete!</p>
+        <div style={{ padding: '10px', backgroundColor: '#e8f5e9', border: '1px solid #4caf50', borderRadius: '5px', marginTop: '10px',textAlign: 'center' }}>
+          <p style={{ color: '#2e7d32', margin: 0, fontSize: '14px' }}>Upload Complete!</p>
           <button onClick={handleReset} style={{ marginTop: '8px', fontSize: '12px', color: '#0070f3', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>
             Upload another
           </button>
