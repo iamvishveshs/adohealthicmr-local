@@ -17,6 +17,7 @@ import RiskFactorsSection from "../components/RiskFactorsSection";
 import Footer from "../components/Footer";
 import UploadProgressBar from "../components/UploadProgressBar";
 import VideoPlayer from "../components/VideoPlayer";
+import VideoUploader from "./components/VideoUploader";
 import { UploadProgress } from "../lib/cloudinary-direct-upload";
 import { storeVideo, uploadVideoInBackground, processPendingUploads, getPendingUploads, type StoredVideo } from "../lib/video-storage";
 
