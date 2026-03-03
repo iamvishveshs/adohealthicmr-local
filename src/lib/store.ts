@@ -4,7 +4,6 @@
  */
 
 import { query, queryOne, run } from '@/lib/db';
-// We assume '@/lib/db' uses the standard pg 'Pool' configured with DATABASE_URL
 
 // --- Types ---
 export interface ModuleRecord {
@@ -66,17 +65,24 @@ export interface LoginHistoryRecord {
 // --- Modules ---
 export async function getModules(): Promise<ModuleRecord[]> {
   const res = await query('SELECT id, title, description, color FROM modules ORDER BY id');
-  return res.map((r: any) => ({ id: r.id, title: r.title, description: r.description, color: r.color }));
+  return res.map((r: any) => ({
+    id: r.id,
+    title: r.title,
+    description: r.description,
+    color: r.color
+  }));
 }
 
 export async function getModuleById(id: number): Promise<ModuleRecord | undefined> {
   const row = await queryOne('SELECT id, title, description, color FROM modules WHERE id = $1', [id]);
-  return row ? { id: row.id, title: row.title, description: row.description, color: row.color } : undefined;
+  const r = row as any;
+  return r ? { id: r.id, title: r.title, description: r.description, color: r.color } : undefined;
 }
 
 export async function createModule(data: ModuleRecord): Promise<ModuleRecord> {
   await run(
-    `INSERT INTO modules (id, title, description, color) VALUES ($1,$2,$3,$4) ON CONFLICT (id) DO NOTHING`,
+    `INSERT INTO modules (id, title, description, color) VALUES ($1,$2,$3,$4)
+     ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description, color = EXCLUDED.color`,
     [data.id, data.title, data.description, data.color]
   );
   return data;
@@ -87,25 +93,30 @@ export async function updateModule(id: number, updates: Partial<Omit<ModuleRecor
     `UPDATE modules SET title = COALESCE($1,title), description = COALESCE($2,description), color = COALESCE($3,color) WHERE id = $4`,
     [updates.title ?? null, updates.description ?? null, updates.color ?? null, id]
   );
-  return getModuleById(id) ?? null;
+  const updated = await getModuleById(id);
+  return updated ?? null;
 }
 
 export async function deleteModule(id: number): Promise<boolean> {
   await run('DELETE FROM modules WHERE id = $1', [id]);
-  return true; // Simple true return as run doesn't return rowCount directly
+  return true;
 }
 
 // --- Questions ---
 function mapQuestionRow(row: any): QuestionRecord {
   let parsedOptions = row.options;
   if (typeof row.options === 'string') {
-    try { parsedOptions = JSON.parse(row.options); } catch (e) { parsedOptions = []; }
+    try {
+      parsedOptions = JSON.parse(row.options);
+    } catch (e) {
+      parsedOptions = [];
+    }
   }
   return {
     id: row.id,
     moduleId: row.module_id,
     question: row.question,
-    options: parsedOptions,
+    options: Array.isArray(parsedOptions) ? parsedOptions : [],
     correctAnswer: row.correct_answer,
   };
 }
@@ -130,7 +141,7 @@ export async function getQuestionById(id: number, moduleId: number): Promise<Que
 export async function createQuestion(data: QuestionRecord): Promise<QuestionRecord> {
   const optionsJson = JSON.stringify(data.options || []);
   await run(
-    'INSERT INTO questions (id, module_id, question, options, correct_answer) VALUES ($1, $2, $3, $4, $5)',
+    'INSERT INTO questions (id, module_id, question, options, correct_answer) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (id, module_id) DO UPDATE SET question = EXCLUDED.question, options = EXCLUDED.options, correct_answer = EXCLUDED.correct_answer',
     [data.id, data.moduleId, data.question || '', optionsJson, data.correctAnswer ?? null]
   );
   const created = await getQuestionById(data.id, data.moduleId);
@@ -150,12 +161,11 @@ export async function updateQuestion(id: number, moduleId: number, updates: Part
     'UPDATE questions SET question = $1, options = $2, correct_answer = $3 WHERE id = $4 AND module_id = $5',
     [question, options, correctAnswer, id, moduleId]
   );
-  return getQuestionById(id, moduleId) ?? null;
+  const updated = await getQuestionById(id, moduleId);
+  return updated ?? null;
 }
 
 export async function deleteQuestion(id: number, moduleId: number): Promise<boolean> {
-  const existing = await getQuestionById(id, moduleId);
-  if (!existing) return false;
   await run('DELETE FROM questions WHERE id = $1 AND module_id = $2', [id, moduleId]);
   return true;
 }
@@ -165,7 +175,7 @@ function mapVideoRow(row: any): VideoRecord {
   return {
     id: row.id,
     moduleId: row.module_id,
-    videoType: row.video_type as 'english' | 'punjabi' | 'hindi' | 'activity',
+    videoType: row.video_type,
     videoId: Number(row.video_id),
     preview: row.preview,
     fileName: row.file_name,
@@ -223,9 +233,6 @@ export async function updateVideo(
   videoId: number,
   updates: Partial<Pick<VideoRecord, 'preview' | 'fileName' | 'fileSize' | 'fileUrl'>>
 ): Promise<VideoRecord | null> {
-  const existing = await getVideoById(moduleId, videoType, videoId);
-  if (!existing) return null;
-
   await run(
     `UPDATE videos SET
      preview = COALESCE($1, preview),
@@ -235,12 +242,11 @@ export async function updateVideo(
      WHERE module_id = $5 AND video_type = $6 AND video_id = $7`,
     [updates.preview ?? null, updates.fileName ?? null, updates.fileSize ?? null, updates.fileUrl ?? null, moduleId, videoType, videoId]
   );
-  return getVideoById(moduleId, videoType, videoId) ?? null;
+  const updated = await getVideoById(moduleId, videoType, videoId);
+  return updated ?? null;
 }
 
 export async function deleteVideo(moduleId: number, videoType: string, videoId: number): Promise<boolean> {
-  const existing = await getVideoById(moduleId, videoType, videoId);
-  if (!existing) return false;
   await run('DELETE FROM videos WHERE module_id = $1 AND video_type = $2 AND video_id = $3', [moduleId, videoType, videoId]);
   return true;
 }
@@ -259,7 +265,7 @@ export async function getAnswers(userId: string, moduleId?: number): Promise<Ans
     moduleId: r.module_id,
     questionId: r.question_id,
     answer: r.answer,
-    isCorrect: r.is_correct === 1,
+    isCorrect: Boolean(r.is_correct),
     submittedAt: new Date(r.submitted_at),
   }));
 }
@@ -277,19 +283,18 @@ export async function getAllAnswers(moduleId?: number): Promise<AnswerRecord[]> 
     moduleId: r.module_id,
     questionId: r.question_id,
     answer: r.answer,
-    isCorrect: r.is_correct === 1,
+    isCorrect: Boolean(r.is_correct),
     submittedAt: new Date(r.submitted_at),
   }));
 }
 
 export async function upsertAnswer(data: { userId: string; moduleId: number; questionId: number; answer: string; isCorrect?: boolean }): Promise<AnswerRecord> {
-  const isCorrectInt = data.isCorrect ? 1 : 0;
   await run(
     `INSERT INTO answers (user_id, module_id, question_id, answer, is_correct)
      VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (user_id, module_id, question_id)
      DO UPDATE SET answer = EXCLUDED.answer, is_correct = EXCLUDED.is_correct, submitted_at = CURRENT_TIMESTAMP`,
-    [data.userId, data.moduleId, data.questionId, data.answer, isCorrectInt]
+    [data.userId, data.moduleId, data.questionId, data.answer, data.isCorrect ?? false]
   );
   return {
     ...data,
@@ -297,16 +302,17 @@ export async function upsertAnswer(data: { userId: string; moduleId: number; que
   };
 }
 
-// --- Users & Login History (Mapped directly to pg-auth equivalents or bypassed if pg-auth handles it) ---
-// Note: Your pg-auth.ts handles users, but if any part of your app still calls these store methods, they will now query Postgres.
+// --- Users & Login History ---
 export async function getUserByUsername(username: string): Promise<UserRecord | undefined> {
   const row = await queryOne('SELECT * FROM users WHERE username = $1', [username]);
-  return row ? { id: row.id, username: row.username, email: row.email, passwordHash: row.password_hash, role: row.role as 'user' | 'admin' } : undefined;
+  const r = row as any;
+  return r ? { id: r.id, username: r.username, email: r.email, passwordHash: r.password_hash, role: r.role as 'user' | 'admin' } : undefined;
 }
 
 export async function getUserById(id: string): Promise<UserRecord | undefined> {
   const row = await queryOne('SELECT * FROM users WHERE id = $1', [id]);
-  return row ? { id: row.id, username: row.username, email: row.email, passwordHash: row.password_hash, role: row.role as 'user' | 'admin' } : undefined;
+  const r = row as any;
+  return r ? { id: r.id, username: r.username, email: r.email, passwordHash: r.password_hash, role: r.role as 'user' | 'admin' } : undefined;
 }
 
 export async function getAllUsers(opts?: { role?: 'user' | 'admin'; search?: string }): Promise<UserRecord[]> {
@@ -325,7 +331,11 @@ export async function getAllUsers(opts?: { role?: 'user' | 'admin'; search?: str
   }
   const rows = await query(sql, params);
   return rows.map((row: any) => ({
-    id: row.id, username: row.username, email: row.email, passwordHash: row.password_hash, role: row.role as 'user' | 'admin'
+    id: row.id,
+    username: row.username,
+    email: row.email,
+    passwordHash: row.password_hash,
+    role: row.role as 'user' | 'admin'
   }));
 }
 
@@ -356,7 +366,8 @@ export async function updateUserById(
     'UPDATE users SET username = COALESCE($1,username), email = COALESCE($2,email), role = COALESCE($3,role), password_hash = $4 WHERE id = $5',
     [updates.username ?? null, updates.email ?? null, updates.role ?? null, newHash, id]
   );
-  return getUserById(id) ?? null;
+  const updated = await getUserById(id);
+  return updated ?? null;
 }
 
 export async function deleteUserById(id: string): Promise<boolean> {
@@ -379,12 +390,12 @@ export async function getLoginHistory(limit = 100): Promise<LoginHistoryRecord[]
   }));
 }
 
-// --- Health ---
+// --- Health Status ---
 export async function getStoreStatus(): Promise<{ modules: number; questions: number; users: number }> {
   try {
-    const modCount = await queryOne('SELECT COUNT(*) as count FROM modules', []);
-    const qCount = await queryOne('SELECT COUNT(*) as count FROM questions', []);
-    const uCount = await queryOne('SELECT COUNT(*) as count FROM users', []);
+    const modCount = await queryOne('SELECT COUNT(*) as count FROM modules', []) as any;
+    const qCount = await queryOne('SELECT COUNT(*) as count FROM questions', []) as any;
+    const uCount = await queryOne('SELECT COUNT(*) as count FROM users', []) as any;
     return {
       modules: parseInt(modCount?.count || '0', 10),
       questions: parseInt(qCount?.count || '0', 10),
@@ -395,7 +406,7 @@ export async function getStoreStatus(): Promise<{ modules: number; questions: nu
   }
 }
 
-// Ensure old synchronous functions aren't exported by mistake
+// Ensure old synchronous functions aren't exported
 export function replaceModulesAndQuestions() {
   throw new Error("replaceModulesAndQuestions is deprecated. Update Postgres directly.");
 }
