@@ -12,7 +12,7 @@ export const GET = requireAdmin(async (request: NextRequest) => {
     if (!hasDatabase()) {
       const allFallbackUsers = await getFallbackUsers();
       // Filter out admins in fallback mode
-      const users = allFallbackUsers.filter(u => u.role !== 'admin');
+      const users = allFallbackUsers.filter(u =>(u.role as string) !== 'admin');
       return NextResponse.json({ success: true, users, count: users.length });
     }
 
