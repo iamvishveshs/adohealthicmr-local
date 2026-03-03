@@ -1410,7 +1410,7 @@ export default function Home() {
     }
   };
 
-  
+
   const handleCancelPendingVideo = (moduleId: number) => {
     if (!isAdmin) return; // Only admin can cancel pending videos
 
@@ -1426,67 +1426,79 @@ export default function Home() {
     }));
   };
 
-  const handleSubmitAnswers = async (event: React.FormEvent<HTMLFormElement>, moduleId: number) => {
+ const handleSubmitAnswers = async (event: React.FormEvent<HTMLFormElement>, moduleId: number) => {
     event.preventDefault();
     setActionLoading(true); // Disable the button immediately
+
     // Collect all form answers
     const formData = new FormData(event.currentTarget);
-    const answers: { [key: string]: string } = {};
+    const emailAnswers: { [key: string]: string } = {};
+    const answersToSave: { [questionId: number]: string } = {};
+    const answersArray: Array<{ questionId: number, answer: string }> = [];
 
     const questions = moduleQuestions[moduleId] || [];
+
+    // 1. Gather all answers in one pass
     questions.forEach((q) => {
       const answer = formData.get(`question-${q.id}`);
       if (answer) {
-        answers[`Question ${q.id}`] = answer as string;
+        const answerStr = answer as string;
+        emailAnswers[`Question ${q.id}`] = answerStr;
+        answersToSave[q.id] = answerStr;
+        answersArray.push({
+          questionId: q.id,
+          answer: answerStr,
+        });
       }
     });
 
-    // Format answers for email
+    if (answersArray.length === 0) {
+      alert("Please answer at least one question before submitting.");
+      setActionLoading(false);
+      return;
+    }
+
+    // 2. Format answers for email
     const selectedModule = modules.find(m => m.id === moduleId);
     const emailSubject = `${selectedModule?.title || `Module ${moduleId}`} Pre-Post Questions Answers`;
     let emailBody = `${selectedModule?.title || `Module ${moduleId}`} Pre-Post Questions - Answers\n\n`;
 
-    Object.entries(answers).forEach(([question, answer]) => {
+    Object.entries(emailAnswers).forEach(([question, answer]) => {
       emailBody += `${question}: ${answer}\n`;
     });
 
     emailBody += "\n\nSubmitted via AdoHealth Initiative Website";
 
     try {
-      // 1. Save answers to API first so they show in admin section even if email fails
-      const answersToSave: { [questionId: number]: string } = {};
-      const answerPromises: Promise<any>[] = [];
-      questions.forEach((q) => {
-        const answer = formData.get(`question-${q.id}`);
-        if (answer) {
-          answersToSave[q.id] = answer as string;
-          answerPromises.push(
-            submitAnswer({
-              moduleId,
-              questionId: q.id,
-              answer: answer as string,
-            })
-          );
-        }
-      });
-
+      // 3. Save answers to API using ONE bulk request
       let saveOk = false;
       try {
-        const answerResults = await Promise.all(answerPromises);
-        saveOk = answerResults.every(r => r.success);
+        const response = await fetch('/api/answers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            moduleId,
+            answers: answersArray
+          }),
+        });
+
+        const result = await response.json();
+        saveOk = !!result.success;
+
         if (saveOk) {
+          // Update local state so UI shows "Update & Resubmit"
           setSavedAnswers(prev => ({ ...prev, [moduleId]: answersToSave }));
         }
       } catch (err) {
-        console.error('Error saving answers to API:', err);
+        console.error('Error saving bulk answers to API:', err);
       }
 
       if (!saveOk) {
-        alert('Failed to save answers. Please try again.');
+        alert('Failed to save answers to the database. Please try again.');
         return;
       }
 
-      // 2. Then try to send email (optional; answers already saved for admin)
+      // 4. Then try to send email (optional; answers already saved for admin)
       let emailSent = false;
       try {
         const response = await fetch('/api/send-email', {
@@ -1496,7 +1508,7 @@ export default function Home() {
             to: 'adohealthicmr2025@gmail.com',
             subject: emailSubject,
             body: emailBody,
-            answers,
+            answers: emailAnswers,
           }),
         });
         const data = await response.json().catch(() => ({}));

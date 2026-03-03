@@ -289,17 +289,47 @@ export async function getAllAnswers(moduleId?: number): Promise<AnswerRecord[]> 
 }
 
 export async function upsertAnswer(data: { userId: string; moduleId: number; questionId: number; answer: string; isCorrect?: boolean }): Promise<AnswerRecord> {
+  const isCorrectInt = data.isCorrect ? 1 : 0; // Convert boolean to integer for Postgres
+
   await run(
     `INSERT INTO answers (user_id, module_id, question_id, answer, is_correct)
      VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (user_id, module_id, question_id)
      DO UPDATE SET answer = EXCLUDED.answer, is_correct = EXCLUDED.is_correct, submitted_at = CURRENT_TIMESTAMP`,
-    [data.userId, data.moduleId, data.questionId, data.answer, data.isCorrect ?? false]
+    [data.userId, data.moduleId, data.questionId, data.answer, isCorrectInt]
   );
-  return {
-    ...data,
-    submittedAt: new Date(),
-  };
+  return { ...data, submittedAt: new Date() };
+}
+
+
+// 2. NEW: Bulk Insert function for maximum performance
+export async function upsertAnswers(dataList: { userId: string; moduleId: number; questionId: number; answer: string; isCorrect?: boolean }[]): Promise<AnswerRecord[]> {
+  if (!dataList || dataList.length === 0) return [];
+
+  const values: any[] = [];
+  const placeholders: string[] = [];
+  let i = 1;
+
+  dataList.forEach((data) => {
+    const isCorrectInt = data.isCorrect ? 1 : 0; // Convert boolean to integer
+    placeholders.push(`($${i++}, $${i++}, $${i++}, $${i++}, $${i++})`);
+    values.push(data.userId, data.moduleId, data.questionId, data.answer, isCorrectInt);
+  });
+
+  // Single query execution for all answers
+  const sql = `
+    INSERT INTO answers (user_id, module_id, question_id, answer, is_correct)
+    VALUES ${placeholders.join(', ')}
+    ON CONFLICT (user_id, module_id, question_id)
+    DO UPDATE SET
+      answer = EXCLUDED.answer,
+      is_correct = EXCLUDED.is_correct,
+      submitted_at = CURRENT_TIMESTAMP
+  `;
+
+  await run(sql, values);
+
+  return dataList.map(data => ({ ...data, submittedAt: new Date() }));
 }
 
 // --- Users & Login History ---
