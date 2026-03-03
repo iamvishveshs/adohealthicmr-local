@@ -18,11 +18,13 @@ export const GET = requireAuth(async (request: NextRequest, user) => {
     const moduleIdNum = moduleIdParam ? parseInt(moduleIdParam) : undefined;
     const moduleFilter = moduleIdNum != null && !isNaN(moduleIdNum) ? moduleIdNum : undefined;
 
-    const status = await getStoreStatus();
+    const status = await getStoreStatus(); // Added await
     const totalModules = status.modules;
     const totalQuestions = status.questions;
     const totalUsers = user.role === 'admin' ? status.users : undefined;
-    const totalVideos = await getVideos(moduleFilter).length;
+
+    const videos = await getVideos(moduleFilter); // Added await here too!
+    const totalVideos = videos.length;
 
     let answerStats: {
       totalAnswers: number;
