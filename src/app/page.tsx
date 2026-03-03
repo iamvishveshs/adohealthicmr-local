@@ -1359,17 +1359,34 @@ export default function Home() {
     }
   };
 
-  const handleRemoveVideo = async (moduleId: number, id: number) => {
-    if (!isAdmin) return; // Only admin can remove videos
+  const handleRemoveVideo = (moduleId: number, id: number) => {
+    if (!isAdmin) return;
 
     const videoType = selectedVideoType[moduleId];
     if (!videoType) return;
 
+    // Trigger the existing confirmation modal logic
+    setConfirmModalData({
+      title: "Remove Video",
+      message: `Are you sure you want to remove the ${videoType} video? This will permanently delete the video record from the database.`,
+      onConfirm: async () => {
+        setShowConfirmModal(false); // Close modal immediately
+        await performVideoDeletion(moduleId, id, videoType); // Execute actual deletion
+      }
+    });
+
+    setShowConfirmModal(true);
+  };
+
+  // Helper function to handle the actual API call and state update
+  const performVideoDeletion = async (moduleId: number, id: number, videoType: string) => {
+    setActionLoading(true);
     try {
       // Delete video via API
       const response = await deleteVideo(id, moduleId, videoType);
 
       if (response.success) {
+        // Update local videos state
         const updatedVideos = {
           ...videos,
           [moduleId]: {
@@ -1378,6 +1395,8 @@ export default function Home() {
           }
         };
         setVideos(updatedVideos);
+
+        // Refresh data from server to ensure sync
         await refetchData();
         showSaveFeedback('success', 'Video deleted successfully.', { type: 'video', moduleId });
       } else {
@@ -1386,9 +1405,12 @@ export default function Home() {
     } catch (error: any) {
       console.error('Error removing video:', error);
       showSaveFeedback('error', 'An error occurred while deleting the video. Please try again.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
+  
   const handleCancelPendingVideo = (moduleId: number) => {
     if (!isAdmin) return; // Only admin can cancel pending videos
 
