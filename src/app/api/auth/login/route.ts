@@ -35,14 +35,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // --- User login by email + password (simple: enter email, set password; create account if new) ---
+    // --- User login by email + password ---
     if (isUserLoginByEmail) {
       const trimmedEmail = (email as string).trim().toLowerCase();
       if (!password) {
         return NextResponse.json({ error: 'Password required', message: 'Please enter your password.' }, { status: 400 });
       }
 
-      // When DB not configured: use file-based fallback store
+      // Fallback Store (No DB)
       if (!hasDatabase()) {
         let user = await getFallbackUserByEmail(trimmedEmail);
         if (!user) {
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
             user = await createFallbackUser(trimmedEmail, password);
           } catch (err) {
             console.error('Create fallback user error:', err);
-            return NextResponse.json({ error: 'Sign up failed', message: 'Could not create account. Try again or use a different email.' }, { status: 500 });
+            return NextResponse.json({ error: 'Sign up failed', message: 'Could not create account.' }, { status: 500 });
           }
         } else {
           if (!verifyFallbackPassword(user, password)) {
@@ -59,200 +59,116 @@ export async function POST(request: NextRequest) {
         }
         const token = generateToken({ userId: user.id, username: user.email, role: user.role });
         const permissions = getRolePermissions(user.role);
-        const response = NextResponse.json(
-          {
-            success: true,
-            message: 'User login successful',
-            user: { id: user.id, username: user.username, email: user.email, role: user.role },
-            permissions: { ...permissions, isAdmin: false, isUser: true },
-          },
-          { status: 200 }
-        );
-        response.cookies.set('token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7,
-          path: '/',
+        const response = NextResponse.json({
+          success: true,
+          message: 'User login successful',
+          user: { id: user.id, username: user.username, email: user.email, role: user.role },
+          permissions: { ...permissions, isAdmin: false, isUser: true },
         });
+        response.cookies.set('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 60 * 60 * 24 * 7, path: '/' });
         return response;
       }
 
+      // Database Logic
       await ensureAuthSchema();
       let user = await getUserByEmail(trimmedEmail);
+
       if (!user) {
         try {
+          // If DB requires a username field, ensure your createUserByEmail handles it.
+          // This call triggers the actual DB INSERT.
           user = await createUserByEmail(trimmedEmail, password);
         } catch (err: any) {
-          console.error('Create user by email error:', err);
-          // Check if it's a duplicate user error (user was created between check and insert)
-          const isDuplicateError = err?.code === '23505' || 
-                                   err?.message?.includes('duplicate') || 
-                                   err?.message?.includes('already exists') ||
-                                   err?.message?.toLowerCase().includes('user with');
-          
+          console.error('Database INSERT failed:', err);
+
+          const isDuplicateError = err?.code === '23505' || err?.message?.includes('duplicate') || err?.message?.includes('exists');
+
           if (isDuplicateError) {
-            // User was created by another request, try to get it again
             user = await getUserByEmail(trimmedEmail);
-            if (!user) {
-              return NextResponse.json({ 
-                error: 'Account exists', 
-                message: 'An account with this email already exists. Please log in with your password.' 
-              }, { status: 409 });
-            }
-            // Verify password for the existing user
+            if (!user) return NextResponse.json({ error: 'Conflict', message: 'User exists but could not be retrieved.' }, { status: 409 });
+
             const valid = await verifyUserPasswordByEmail(trimmedEmail, password);
-            if (!valid) {
-              return NextResponse.json({ error: 'Invalid credentials', message: 'Email or password is incorrect' }, { status: 401 });
-            }
+            if (!valid) return NextResponse.json({ error: 'Invalid credentials', message: 'Incorrect password for existing account.' }, { status: 401 });
           } else {
-            // Other database or system errors
-            const errorMessage = err?.message || 'Unknown error';
-            console.error('Unexpected error creating user:', errorMessage);
-            return NextResponse.json({ 
-              error: 'Sign up failed', 
-              message: 'Could not create account. Please try again or contact support if the problem persists.' 
+            // This is the source of your 500 error. Check if username column is NOT NULL.
+            return NextResponse.json({
+              error: 'Database Error',
+              message: 'Failed to create user. Check if database schema requires a username.',
+              details: err.message
             }, { status: 500 });
           }
         }
       } else {
-        // User exists, verify password
         const valid = await verifyUserPasswordByEmail(trimmedEmail, password);
         if (!valid) {
           return NextResponse.json({ error: 'Invalid credentials', message: 'Email or password is incorrect' }, { status: 401 });
         }
       }
-      if (!user) {
-        return NextResponse.json({ error: 'User not found', message: 'Could not retrieve user information.' }, { status: 500 });
-      }
-      if (!isValidRole(user.role)) {
-        return NextResponse.json({ error: 'Invalid user role', message: 'User has an invalid role. Contact administrator.' }, { status: 403 });
-      }
+
+      if (!user) return NextResponse.json({ error: 'User not found' }, { status: 500 });
+      if (!isValidRole(user.role)) return NextResponse.json({ error: 'Invalid role' }, { status: 403 });
+
       const token = generateToken({ userId: user.id, username: user.username, role: user.role });
       const permissions = getRolePermissions(user.role);
-      const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-      const userAgent = request.headers.get('user-agent') || 'unknown';
-      // Add login history, but don't fail login if it fails
+
+      // Attempt history log (non-blocking)
       try {
+        const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
         await addLoginHistory({
-          userId: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          loginAt: new Date(),
-          ipAddress: ipAddress.split(',')[0].trim(),
-          userAgent: userAgent.substring(0, 500),
+          userId: user.id, username: user.username, email: user.email, role: user.role,
+          loginAt: new Date(), ipAddress, userAgent: request.headers.get('user-agent')?.substring(0, 500) || 'unknown',
         });
-      } catch (historyError) {
-        // Log but don't fail the login
-        console.error('Failed to add login history (non-blocking):', historyError);
-      }
-      const response = NextResponse.json(
-        {
-          success: true,
-          message: 'User login successful',
-          user: { id: user.id, username: user.username, email: user.email, role: user.role },
-          permissions: { ...permissions, isAdmin: user.role === 'admin', isUser: user.role === 'user' },
-        },
-        { status: 200 }
-      );
-      response.cookies.set('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
+      } catch (e) { console.error('History log failed'); }
+
+      const response = NextResponse.json({
+        success: true,
+        message: 'User login successful',
+        user: { id: user.id, username: user.username, email: user.email, role: user.role },
+        permissions: { ...permissions, isAdmin: user.role === 'admin', isUser: user.role === 'user' },
       });
+      response.cookies.set('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 60 * 60 * 24 * 7, path: '/' });
       return response;
     }
 
-    // --- Admin / username login ---
-    if (!password) {
-      return NextResponse.json({ error: 'Password required', message: 'Please enter your password.' }, { status: 400 });
-    }
+    // --- Admin / Username login ---
+    if (!password) return NextResponse.json({ error: 'Password required' }, { status: 400 });
 
-    // When DB is not configured: allow default admin login (adohealthicmr / Welcome@25) for dev
     if (!hasDatabase()) {
       if (verifyDefaultAdminCredentials(username, password)) {
         const user = getDefaultAdminUser();
         const token = generateToken({ userId: user.id, username: user.username, role: user.role });
-        const permissions = getRolePermissions('admin');
-        const response = NextResponse.json(
-          {
-            success: true,
-            message: 'Admin login successful',
-            user: { id: user.id, username: user.username, email: user.email, role: user.role },
-            permissions: { ...permissions, isAdmin: true, isUser: false },
-          },
-          { status: 200 }
-        );
-        response.cookies.set('token', token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          sameSite: 'lax',
-          maxAge: 60 * 60 * 24 * 7,
-          path: '/',
+        const response = NextResponse.json({
+          success: true,
+          message: 'Admin login successful',
+          user: { id: user.id, username: user.username, email: user.email, role: user.role },
+          permissions: { ...getRolePermissions('admin'), isAdmin: true, isUser: false },
         });
+        response.cookies.set('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 60 * 60 * 24 * 7, path: '/' });
         return response;
       }
-      return NextResponse.json(
-        { error: 'Database not configured', message: 'Invalid password.' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: 'Invalid Admin Credentials' }, { status: 401 });
     }
 
     await ensureAuthSchema();
     const user = await getUserByUsername(username.trim());
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid credentials', message: 'Username or password is incorrect' }, { status: 401 });
+    if (!user || !(await verifyUserPassword(username.trim(), password))) {
+      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
-    const valid = await verifyUserPassword(username.trim(), password);
-    if (!valid) {
-      return NextResponse.json({ error: 'Invalid credentials', message: 'Username or password is incorrect' }, { status: 401 });
-    }
-    if (!isValidRole(user.role)) {
-      return NextResponse.json({ error: 'Invalid user role', message: 'User has an invalid role. Contact administrator.' }, { status: 403 });
-    }
+
     const token = generateToken({ userId: user.id, username: user.username, role: user.role });
-    const permissions = getRolePermissions(user.role);
-    const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-    const userAgent = request.headers.get('user-agent') || 'unknown';
-    // Add login history, but don't fail login if it fails
-    try {
-      await addLoginHistory({
-        userId: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        loginAt: new Date(),
-        ipAddress: ipAddress.split(',')[0].trim(),
-        userAgent: userAgent.substring(0, 500),
-      });
-    } catch (historyError) {
-      // Log but don't fail the login
-      console.error('Failed to add login history (non-blocking):', historyError);
-    }
-    const response = NextResponse.json(
-      {
-        success: true,
-        message: user.role === 'admin' ? 'Admin login successful' : 'User login successful',
-        user: { id: user.id, username: user.username, email: user.email, role: user.role },
-        permissions: { ...permissions, isAdmin: user.role === 'admin', isUser: user.role === 'user' },
-      },
-      { status: 200 }
-    );
-    response.cookies.set('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
-      path: '/',
+    const response = NextResponse.json({
+      success: true,
+      message: 'Login successful',
+      user: { id: user.id, username: user.username, email: user.email, role: user.role },
+      permissions: { ...getRolePermissions(user.role), isAdmin: user.role === 'admin', isUser: user.role === 'user' },
     });
+    response.cookies.set('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 60 * 60 * 24 * 7, path: '/' });
     return response;
-  } catch (error) {
-    console.error('Login error:', error);
+
+  } catch (error: any) {
+    console.error('Login Route Fatal Error:', error);
     return NextResponse.json(
-      { error: 'Failed to login', message: 'An error occurred during login. Please try again.', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Server Error', message: error.message },
       { status: 500 }
     );
   }

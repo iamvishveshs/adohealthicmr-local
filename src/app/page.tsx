@@ -1335,6 +1335,29 @@ export default function Home() {
     }
   };
 
+  const handleDirectUploadSuccess = async (moduleId: number, videoType: string, url: string, publicId: string, bytes: number) => {
+    try {
+      const videoData: VideoData = {
+        moduleId,
+        videoType: videoType as 'english' | 'punjabi' | 'hindi' | 'activity',
+        videoId: Date.now(), // Unique ID
+        preview: url.replace(/\.[^/.]+$/, ".jpg"), // Auto-generated thumbnail
+        fileName: `Video_${moduleId}_${videoType}`,
+        fileSize: bytes,
+        fileUrl: url,
+      };
+
+      const response = await createVideo(videoData);
+
+      if (response.success) {
+        await refetchData(); // Refresh UI to show the new video
+        showSaveFeedback('success', 'Video saved successfully!', { type: 'video', moduleId });
+      }
+    } catch (error) {
+      showSaveFeedback('error', 'Upload successful but failed to save to database.');
+    }
+  };
+
   const handleRemoveVideo = async (moduleId: number, id: number) => {
     if (!isAdmin) return; // Only admin can remove videos
 
@@ -2183,8 +2206,8 @@ export default function Home() {
                                     onClick={() => handleRemoveModule(module.id)}
                                     disabled={actionLoading}
                                     className={`transition-colors p-1 rounded touch-manipulation flex items-center justify-center ${actionLoading
-                                        ? "text-slate-400 cursor-not-allowed bg-slate-200"
-                                        : "text-slate-700 hover:text-red-500 hover:bg-slate-400"
+                                      ? "text-slate-400 cursor-not-allowed bg-slate-200"
+                                      : "text-slate-700 hover:text-red-500 hover:bg-slate-400"
                                       }`}
                                     title={actionLoading ? "Processing..." : "Remove module"}
                                   >
@@ -2405,425 +2428,75 @@ export default function Home() {
                                   )}
                                 </div>
 
-                                {/* 4 Language/Activity Buttons */}
+                                {/* Language Selection Grid */}
                                 {!currentVideoType && (
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                                    {/* English Button */}
-                                    <button
-                                      onClick={() => setSelectedVideoType(prev => ({ ...prev, [module.id]: "english" }))}
-                                      className="p-6 bg-blue-50 border-2 border-blue-300 rounded-lg hover:border-blue-400 hover:shadow-lg transition-all duration-200 text-left"
-                                    >
-                                      <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                                          <span className="text-white font-bold text-lg">EN</span>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                    {["english", "punjabi", "hindi", "activity"].map((type) => (
+                                      <button
+                                        key={type}
+                                        onClick={() => setSelectedVideoType(prev => ({ ...prev, [module.id]: type as any }))}
+                                        className="p-4 bg-blue-50 border-2 border-blue-200 rounded-lg hover:border-blue-400 transition-all text-left"
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          <div className="w-10 h-10 bg-blue-500 rounded flex items-center justify-center flex-shrink-0">
+                                            <span className="text-white font-bold text-xs uppercase">{type.slice(0, 2)}</span>
+                                          </div>
+                                          <div>
+                                            <h4 className="text-sm font-bold text-gray-900 capitalize">{type}</h4>
+                                            <p className="text-[10px] text-gray-500">
+                                              {moduleVideos[type as keyof typeof moduleVideos].length >= 1 ? "1 / 1 Video" : "No video"}
+                                            </p>
+                                          </div>
                                         </div>
-                                        <div>
-                                          <h4 className="text-lg font-bold text-gray-900 mb-1">English</h4>
-                                          <p className="text-sm text-gray-600">{moduleVideos.english.length} / 1 video</p>
-                                        </div>
-                                      </div>
-                                    </button>
-
-                                    {/* Punjabi Button */}
-                                    <button
-                                      onClick={() => setSelectedVideoType(prev => ({ ...prev, [module.id]: "punjabi" }))}
-                                      className="p-6 bg-orange-50 border-2 border-orange-300 rounded-lg hover:border-orange-400 hover:shadow-lg transition-all duration-200 text-left"
-                                    >
-                                      <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                                          <span className="text-white font-bold text-lg">PA</span>
-                                        </div>
-                                        <div>
-                                          <h4 className="text-lg font-bold text-gray-900 mb-1">Punjabi</h4>
-                                          <p className="text-sm text-gray-600">{moduleVideos.punjabi.length} / 1 video</p>
-                                        </div>
-                                      </div>
-                                    </button>
-
-                                    {/* Hindi Button */}
-                                    <button
-                                      onClick={() => setSelectedVideoType(prev => ({ ...prev, [module.id]: "hindi" }))}
-                                      className="p-6 bg-green-50 border-2 border-green-300 rounded-lg hover:border-green-400 hover:shadow-lg transition-all duration-200 text-left"
-                                    >
-                                      <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                                          <span className="text-white font-bold text-lg">HI</span>
-                                        </div>
-                                        <div>
-                                          <h4 className="text-lg font-bold text-gray-900 mb-1">Hindi</h4>
-                                          <p className="text-sm text-gray-600">{moduleVideos.hindi.length} / 1 video</p>
-                                        </div>
-                                      </div>
-                                    </button>
-
-                                    {/* Activity Video Button */}
-                                    <button
-                                      onClick={() => setSelectedVideoType(prev => ({ ...prev, [module.id]: "activity" }))}
-                                      className="p-6 bg-purple-50 border-2 border-purple-300 rounded-lg hover:border-purple-400 hover:shadow-lg transition-all duration-200 text-left"
-                                    >
-                                      <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-white">
-                                            <path d="M14.751 9c.906 0 1.15.756 1.15 1.089v5.912c0 .333-.244 1.089-1.15 1.089H9.249c-.906 0-1.15-.756-1.15-1.089v-5.912c0-.333.244-1.089 1.15-1.089h5.502z" fill="currentColor" />
-                                          </svg>
-                                        </div>
-                                        <div>
-                                          <h4 className="text-lg font-bold text-gray-900 mb-1">Activity Video</h4>
-                                          <p className="text-sm text-gray-600">{moduleVideos.activity.length} / 1 video</p>
-                                        </div>
-                                      </div>
-                                    </button>
+                                      </button>
+                                    ))}
                                   </div>
                                 )}
 
-                                {/* Video Upload Area - Shown when a type is selected */}
+                                {/* Video Content Area */}
                                 {currentVideoType && (() => {
-                                  const savedVideoList = moduleVideos[currentVideoType] || [];
-                                  const pendingVideoList = pendingVideos[module.id]?.[currentVideoType] || null;
-                                  const hasSavedVideo = savedVideoList.length > 0;
-                                  const hasPendingVideo = pendingVideoList && pendingVideoList.length > 0;
-                                  const displayVideo = hasSavedVideo ? savedVideoList : (hasPendingVideo ? pendingVideoList : null);
-                                  const progressKey = `${module.id}-${currentVideoType}`;
-                                  const currentProgress = uploadProgress[progressKey];
+                                  const vType = currentVideoType as keyof typeof moduleVideos;
+                                  // Check if a video is already saved in this specific category
+                                  const savedVideo = moduleVideos[vType]?.[0];
 
                                   return (
-                                    <>
-                                      <div className="mb-6">
-                                        <h4 className="text-xl font-bold text-gray-900 mb-2 capitalize">
-                                          {currentVideoType === "activity" ? "Activity" : currentVideoType} Videos
-                                        </h4>
-                                        <div className="flex items-center justify-between mb-4">
-                                          <p className="text-sm text-gray-600">
-                                            {isAdmin
-                                              ? `Upload videos for ${currentVideoType === "activity" ? "activities" : `the ${currentVideoType} language`}`
-                                              : `View ${currentVideoType === "activity" ? "activity" : currentVideoType} videos`
-                                            }
-                                          </p>
-                                          <span className="text-sm text-gray-500">
-                                            {hasSavedVideo ? "1 / 1 video saved" : hasPendingVideo ? "Pending save" : "No video"}
-                                          </span>
-                                        </div>
-                                      </div>
+                                    <div className="mt-2">
+                                      <h4 className="text-sm font-bold text-gray-800 mb-3 capitalize">{currentVideoType} Category</h4>
 
-                                      {/* Video Upload Area - Only for Admin */}
-                                      {isAdmin && !hasSavedVideo && !hasPendingVideo && (
-                                        <div className="mb-6">
-                                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Upload Video <span className="text-red-500">*</span>
-                                          </label>
-                                          <label
-                                            htmlFor={`video-upload-${module.id}-${currentVideoType}`}
-                                            className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
-                                          >
-                                            <input
-                                              id={`video-upload-${module.id}-${currentVideoType}`}
-                                              type="file"
-                                              accept="video/*"
-                                              onChange={(e) => handleVideoUpload(e, module.id)}
-                                              className="hidden"
-                                            />
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                              <svg
-                                                className="w-12 h-12 mb-4 text-gray-400"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                              >
-                                                <path
-                                                  strokeLinecap="round"
-                                                  strokeLinejoin="round"
-                                                  strokeWidth={2}
-                                                  d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                                                />
-                                              </svg>
-                                              <p className="mb-2 text-sm text-gray-500">
-                                                <span className="font-semibold">Click to upload</span> or drag and drop
-                                              </p>
-                                              <p className="text-xs text-gray-500">MP4, AVI, MOV (MAX. 5GB each)</p>
-                                            </div>
-                                          </label>
-
-                                          {/* Upload Progress Bar - Shows during upload */}
-                                          {currentProgress && (
-                                            <div className="mt-4">
-                                              <UploadProgressBar
-                                                progress={currentProgress.progress}
-                                                message={currentProgress.message}
-                                                stage={currentProgress.stage}
-                                                originalSize={currentProgress.originalSize}
-                                                compressedSize={currentProgress.compressedSize}
-                                                uploadedBytes={currentProgress.uploadedBytes}
-                                                totalBytes={currentProgress.totalBytes}
-                                              />
-                                            </div>
+                                      {savedVideo ? (
+                                        /* ONE VIDEO LIMIT: If video exists, show Player and Remove Button */
+                                        <div className="relative group border rounded-lg overflow-hidden">
+                                          <VideoPlayer url={savedVideo.fileUrl} className="w-full aspect-video" />
+                                          {isAdmin && (
+                                            <button
+                                              onClick={() => handleRemoveVideo(module.id, savedVideo.id)}
+                                              className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1.5 rounded shadow-lg text-[10px] font-bold hover:bg-red-700 transition-colors"
+                                            >
+                                              ✕ Remove Video
+                                            </button>
                                           )}
-                                        </div>
-                                      )}
-
-                                      {/* Pending Video Display with Save Button - Only for Admin */}
-                                      {isAdmin && hasPendingVideo && !hasSavedVideo && displayVideo && displayVideo.length > 0 && (() => {
-                                        const pendingVideo = displayVideo[0];
-
-                                        // Source: local path or Cloudinary URL (never blob URLs)
-                                        const pendingVideoSrc = pendingVideo.fileUrl || null;
-                                        const pendingVideoPoster = pendingVideo.preview && (
-                                          pendingVideo.preview.startsWith('/') ||
-                                          (pendingVideo.preview.startsWith('https://') && !pendingVideo.preview.includes('/video/upload/'))
-                                        ) ? pendingVideo.preview : undefined;
-
-                                        console.log('[Video Display] Pending video:', {
-                                          hasFileUrl: !!pendingVideo.fileUrl,
-                                          fileUrl: pendingVideo.fileUrl,
-                                          preview: pendingVideo.preview,
-                                          videoSrc: pendingVideoSrc,
-                                          poster: pendingVideoPoster,
-                                        });
-
-                                        return (
-                                          <div className="relative mb-6">
-                                            <div className="bg-green-50 border-2 border-green-300 rounded-lg p-4 mb-4">
-                                              <p className="text-sm text-green-800 font-medium mb-1">
-                                                ✅ Video uploaded successfully!
-                                              </p>
-                                              <p className="text-xs text-green-700">
-                                                Preview your video below. Click &quot;Save Video&quot; to make it available to all users.
-                                              </p>
-                                            </div>
-                                            <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-                                              <div className="relative mb-3">
-                                                {pendingVideoSrc ? (
-                                                  <VideoPlayer
-                                                    url={pendingVideoSrc}
-                                                    poster={pendingVideoPoster}
-                                                    className="rounded-lg border border-gray-300"
-                                                    onError={(error) => {
-                                                      console.error('[Video Display] Pending video playback error:', error);
-                                                    }}
-                                                  />
-                                                ) : (
-                                                  <div className="relative aspect-video bg-gray-100 rounded-lg border border-gray-300 flex items-center justify-center">
-                                                    <div className="text-center p-4">
-                                                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 mx-auto mb-2"></div>
-                                                      <p className="text-gray-500 text-sm">Processing video...</p>
-                                                      <p className="text-gray-400 text-xs mt-1">Video URL will be available shortly</p>
-                                                    </div>
-                                                  </div>
-                                                )}
-                                              </div>
-                                              <div className="p-3 bg-white rounded-lg">
-                                                <p className="text-sm font-semibold text-gray-900 mb-1">
-                                                  {currentVideoType === "activity" ? "Activity" : currentVideoType.charAt(0).toUpperCase() + currentVideoType.slice(1)} Video (Preview)
-                                                </p>
-                                                <p className="text-xs text-gray-600 truncate" title={pendingVideo.fileName}>
-                                                  📹 {pendingVideo.fileName}
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                  📦 Size: {(pendingVideo.fileSize / 1024 / 1024).toFixed(2)} MB
-                                                </p>
-                                                {!pendingVideoSrc && (
-                                                  <p className="text-xs text-yellow-600 mt-2">
-                                                    ⚠️ Video URL is being processed. Please wait...
-                                                  </p>
-                                                )}
-                                                <div className="mt-4 flex gap-3">
-                                                  <button
-                                                    onClick={() => handleSaveVideo(module.id)}
-                                                    className="flex-1 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors shadow-md"
-                                                  >
-                                                    Save Video
-                                                  </button>
-                                                  <button
-                                                    onClick={() => handleCancelPendingVideo(module.id)}
-                                                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-400 transition-colors"
-                                                  >
-                                                    Cancel
-                                                  </button>
-                                                </div>
-                                              </div>
-                                            </div>
+                                          <div className="p-2 bg-gray-50 border-t">
+                                            <p className="text-[10px] text-gray-600 truncate">File: {savedVideo.fileName}</p>
                                           </div>
-                                        );
-                                      })()}
-
-                                      {/* Saved Video Display - Visible to all users */}
-                                      {hasSavedVideo && displayVideo && displayVideo.length > 0 && (() => {
-                                        const video = displayVideo[0];
-
-                                        // Video source: local path (/uploads/videos/...) or Cloudinary URL
-                                        let videoSrc = video.fileUrl || null;
-                                        // If fileUrl missing, try to use preview if it's already a video URL
-                                        if (!videoSrc && video.preview) {
-                                          // Check if preview is already a Cloudinary video URL (not a thumbnail)
-                                          if (video.preview.includes('res.cloudinary.com') &&
-                                            video.preview.includes('/video/upload/') &&
-                                            !video.preview.match(/\.(jpg|jpeg|png|gif|webp)(\?|$)/i) &&
-                                            !video.preview.includes('/w_') &&
-                                            !video.preview.includes('/h_') &&
-                                            !video.preview.includes('/c_') &&
-                                            !video.preview.includes('/f_jpg')) {
-                                            // Preview is already a video URL, use it directly (but ensure optimizations are applied)
-                                            let optimizedPreview = video.preview;
-                                            if (!optimizedPreview.includes('f_mp4')) {
-                                              // Add video optimizations if not already present
-                                              optimizedPreview = optimizedPreview.replace(
-                                                /\/video\/upload\/([^\/]*)\//,
-                                                '/video/upload/$1,f_mp4,f_auto,q_auto/'
-                                              );
-                                            }
-                                            videoSrc = optimizedPreview;
-                                            console.log('[Video Display] Using preview as video URL:', videoSrc);
-                                          }
-                                        }
-
-                                        // If still no video URL and preview is a Cloudinary thumbnail, extract public_id and construct video URL
-                                        if (!videoSrc && video.preview && video.preview.includes('res.cloudinary.com')) {
-                                          try {
-                                            // Extract public_id from thumbnail URL
-                                            // Format: https://res.cloudinary.com/{cloud_name}/video/upload/{transformations}/{public_id}.jpg
-                                            // The public_id can contain folder paths, so we extract everything after transformations and before the file extension
-
-                                            const cloudName = video.preview.match(/res\.cloudinary\.com\/([^\/]+)/)?.[1] || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'adohealth';
-
-                                            // Match: /video/upload/{transformations}/{public_id}.{ext}
-                                            // Transformations are typically in one segment (e.g., "w_640,h_360,c_fill,f_jpg")
-                                            // Public_id can span multiple segments if it's in a folder structure
-                                            const match = video.preview.match(/\/video\/upload\/([^\/]+)\/(.+?)\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i);
-
-                                            if (match && match[2]) {
-                                              const publicId = match[2];
-                                              // Verify the extracted public_id doesn't contain transformation patterns
-                                              // (in case the regex matched incorrectly)
-                                              if (!publicId.match(/^(w_|h_|c_|f_|q_|ar_|dpr_)/)) {
-                                                videoSrc = `https://res.cloudinary.com/${cloudName}/video/upload/f_mp4,f_auto,q_auto/${publicId}`;
-                                                console.log('[Video Display] Constructed video URL from preview:', {
-                                                  preview: video.preview,
-                                                  publicId,
-                                                  constructedUrl: videoSrc,
-                                                });
-                                              }
-                                            }
-                                          } catch (error) {
-                                            console.error('[Video Display] Error extracting public_id from preview:', error);
-                                          }
-                                        }
-
-                                        // Poster: Cloudinary image URL or local placeholder
-                                        const videoPoster = video.preview && (
-                                          (video.preview.startsWith('https://res.cloudinary.com') && !video.preview.includes('/video/upload/'))
-                                          || video.preview.startsWith('/')
-                                        ) ? video.preview : undefined;
-
-                                        // Log video data for debugging
-                                        console.log('[Video Display] Saved video:', {
-                                          hasFileUrl: !!video.fileUrl,
-                                          fileUrl: video.fileUrl,
-                                          preview: video.preview,
-                                          videoSrc,
-                                          videoPoster,
-                                          fileName: video.fileName,
-                                        });
-
-                                        if (!videoSrc) {
-                                          return (
-                                            <div className="relative">
-                                              <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-                                                <div className="p-6 text-center">
-                                                  <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-4">
-                                                    <p className="text-sm text-blue-800 font-medium mb-2">
-                                                      📹 Video metadata found
-                                                    </p>
-                                                    <p className="text-xs text-blue-600 mb-2">
-                                                      File: {video.fileName}
-                                                    </p>
-                                                    <p className="text-xs text-blue-600">
-                                                      Size: {(video.fileSize / 1024 / 1024).toFixed(2)} MB
-                                                    </p>
-                                                  </div>
-                                                  <p className="text-sm text-gray-600 mb-2">
-                                                    Video was saved but video URL is not available.
-                                                  </p>
-                                                  {video.preview && video.preview.includes('res.cloudinary.com') ? (
-                                                    <p className="text-xs text-blue-600 mb-4">
-                                                      Attempting to load video from Cloudinary...
-                                                    </p>
-                                                  ) : (
-                                                    <p className="text-xs text-gray-500 mb-4">
-                                                      {isAdmin ? 'Please remove and re-upload the video to view it.' : 'Please contact an administrator.'}
-                                                    </p>
-                                                  )}
-                                                  {isAdmin && (
-                                                    <div className="flex gap-2 justify-center">
-                                                      <button
-                                                        onClick={async () => {
-                                                          // Try to refresh the video data
-                                                          console.log('[Video Display] Refreshing video data for module:', module.id);
-                                                          await refetchData();
-                                                        }}
-                                                        className="px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition-colors"
-                                                      >
-                                                        Refresh
-                                                      </button>
-                                                      <button
-                                                        onClick={() => handleRemoveVideo(module.id, video.id)}
-                                                        className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors"
-                                                      >
-                                                        Remove Video
-                                                      </button>
-                                                    </div>
-                                                  )}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          );
-                                        }
-
-                                        return (
-                                          <div className="relative">
-                                            <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-                                              <div className="relative mb-3">
-                                                <VideoPlayer
-                                                  url={videoSrc}
-                                                  poster={videoPoster}
-                                                  className="rounded-lg border border-gray-300"
-                                                  onError={(error) => {
-                                                    console.error('Video player error:', error);
-                                                    if (process.env.NODE_ENV === 'development') {
-                                                      console.error('Video data:', { video, videoSrc, videoPoster });
-                                                    }
-                                                  }}
-                                                />
-                                                {isAdmin && (
-                                                  <button
-                                                    onClick={() => handleRemoveVideo(module.id, video.id)}
-                                                    className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors shadow-lg text-sm font-medium z-20"
-                                                  >
-                                                    Remove
-                                                  </button>
-                                                )}
-                                              </div>
-                                              <div className="p-3 bg-white rounded-lg">
-                                                <p className="text-sm font-semibold text-gray-900 mb-1">
-                                                  {currentVideoType === "activity" ? "Activity" : currentVideoType.charAt(0).toUpperCase() + currentVideoType.slice(1)} Video
-                                                </p>
-                                                <p className="text-xs text-gray-600 truncate">
-                                                  {video.fileName}
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                  {(video.fileSize / 1024 / 1024).toFixed(2)} MB
-                                                </p>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        );
-                                      })()}
-
-                                      {/* No Video Message */}
-                                      {!hasSavedVideo && !hasPendingVideo && (
-                                        <div className="text-center py-12 text-gray-500">
-                                          <p>{isAdmin ? "No videos uploaded yet. Click the upload area above to add videos." : "No videos available yet."}</p>
                                         </div>
+                                      ) : (
+                                        /* IF NO VIDEO: Only Admin sees the High-Speed Uploader */
+                                        isAdmin ? (
+                                          <div className="border-2 border-dashed border-blue-200 rounded-lg p-2 bg-slate-50">
+                                            <VideoUploader
+                                              moduleId={module.id}
+                                              videoType={vType}
+                                              onUploadSuccess={(url, pubId, b) => handleDirectUploadSuccess(module.id, vType, url, pubId, b)}
+                                            />
+                                            <p className="text-[10px] text-center text-gray-400 mt-2">Max 1 video per category. Direct upload enabled.</p>
+                                          </div>
+                                        ) : (
+                                          <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
+                                            <p className="text-xs text-gray-400 italic">This video hasn't been uploaded yet.</p>
+                                          </div>
+                                        )
                                       )}
-                                    </>
+                                    </div>
                                   );
                                 })()}
                               </div>
